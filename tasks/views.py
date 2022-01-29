@@ -31,6 +31,7 @@ def delete_task(request, task_id):
 # Complete a task
 def complete_task(request, task_id):
     # get the task as parameter
+    # print([task for task in Task.objects.all()],task_id)
     task = [task for task in Task.objects.all()][task_id-1]
     # create a new task
     new_task = CompletedTask(task=task)
