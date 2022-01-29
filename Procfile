@@ -1,0 +1,1 @@
+web: gunicorn tasks:tasks --preload --timeout 10 --timeout 10
