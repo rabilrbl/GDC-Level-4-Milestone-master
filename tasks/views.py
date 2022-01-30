@@ -1,10 +1,8 @@
-from multiprocessing import context
-from re import search
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.shortcuts import redirect, render
 
 # import the Task model
 from tasks.models import Task
+
 
 # Create your views here.
 def index(request):
@@ -14,6 +12,16 @@ def add_task(request):
     # get the task as parameter
     task = request.GET.get('task')
     priority = request.GET.get('priority')
+    # check if priority exists in the database
+    priority_exists = Task.objects.filter(priority=priority).first()
+    # increment the priority until it is unique
+    if priority_exists.exists():
+        new_priority = priority_exists.priority + 1
+        while priority_exists.exists():
+            new_priority += 1
+            priority_exists = Task.objects.filter(priority=new_priority).first()
+        # save the existing priority task
+        priority_exists.save()
     # create a new task
     new_task = Task(title=task, completed=False, priority=priority)
     # save the task
