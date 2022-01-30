@@ -25,12 +25,13 @@
                     <div class="m-1">
                         <div class="flex flex-row ">
                             <p class="text-center font-bold text-xl">
-                                <!-- awesome bullet -->
-                                <span class="item-left font-thin">{{forloop.counter}}.</span>&nbsp;
-                             {{ task.task }}
+                                {{ task.title }}&nbsp;<sup class="font-thin">{{task.priority}}</sup>
+                                <span class="text-xs text-gray-500 font-extralight block">
+                                    {{ task.date_created }}
+                                </span>
                             </p>
-                            <a href="/delete-completed-task/{{forloop.counter}}/"
-                                class="ml-auto order-2 bg-red-500 hover:bg-red-700 text-white font-bold text-xs py-1 px-2 rounded">
+                            <a href="/delete-completed-task/{{task.id}}/"
+                                class="ml-auto order-2 bg-red-500 hover:bg-red-700 text-white font-bold text-xs py-1 px-2 rounded  max-h-7">
                                 <!-- Delete mark -->
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M6 2l2-2h4l2 2h4v2H2V2h4zM3 6h14l-1 14H4L3 6zm5 2v10h1V8H8zm3 0v10h1V8h-1z"/></svg>
                             </a>
