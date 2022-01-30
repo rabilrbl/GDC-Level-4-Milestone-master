@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-hn4*^-v@9xjaxl&+-1u$hrl*d5wn^&j5_ir%18$-j2z@77u-g6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["gdctask.herokuapp.com","127.0.0.1"]
 
@@ -76,11 +76,14 @@ WSGI_APPLICATION = 'task_manager.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'd5ui9jlmke6rv8',
+        'USER': 'atuddrsagqbehw',
+        'PASSWORD': '3ce4b2c447fab88fab463c597adae5655aa3e42d66a40c9b219c7c7e82e6d295',
+        'HOST': 'ec2-34-242-89-204.eu-west-1.compute.amazonaws.com',
+        'PORT': '5432',
     }
 }
 
