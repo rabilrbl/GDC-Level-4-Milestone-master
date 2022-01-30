@@ -6,6 +6,7 @@ class Task(models.Model):
     # description = models.TextField()
     completed = models.BooleanField(default=False)
     date_created = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.title
