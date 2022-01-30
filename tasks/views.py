@@ -13,15 +13,17 @@ def add_task(request):
     task = request.GET.get('task')
     priority = request.GET.get('priority')
     # check if priority exists in the database
-    priority_exists = Task.objects.filter(priority=priority).first()
-    # increment the priority until it is unique
-    if priority_exists.exists():
-        new_priority = priority_exists.priority + 1
-        while priority_exists.exists():
+    exist_priority = Task.objects.filter(priority=priority, completed=False).exists()
+    # if priority exists in the database
+    if exist_priority:
+        # increment the existing priority until it is unique
+        new_priority = int(priority) + 1
+        exist_priority = Task.objects.filter(priority=new_priority, completed=False).exists()
+        while exist_priority:
             new_priority += 1
-            priority_exists = Task.objects.filter(priority=new_priority).first()
-        # save the existing priority task
-        priority_exists.save()
+            exist_priority = Task.objects.filter(priority=new_priority, completed=False).exists()
+        # save
+        Task.objects.filter(priority=priority).update(priority=new_priority)
     # create a new task
     new_task = Task(title=task, completed=False, priority=priority)
     # save the task
