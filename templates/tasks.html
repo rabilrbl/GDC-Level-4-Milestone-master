@@ -1,110 +1,49 @@
-{% extends "base.html" %}
-{% block content %}
-<!-- Uncompleted tasks list -->
-<div class="flex flex-col items-center justify-center">
-    <!-- List all tasks -->
-    <div class="w-full max-w-[50rem] mx-auto">
-        <!-- Add task from -->
-        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col sm:flex-row sm:justify-around sm:space-x-5 space-y-5 sm:space-y-0">
-            <!-- Search form -->
-            <div class="search-task">
-                <div class="mb-4">
-                    <h2 class="text-xl font-bold text-center">Search task</h2>
-                    <p class="text-center">
-                        Search for a task title.
-                    </p>
-                </div>
-                <div class="flex flex-col items-center justify-center">
-                    <form action="" method="get">
-                        <div class="flex flex-row items-center justify-center">
-                            <div class="flex flex-col items-center justify-center">
-                                <input type="text" name="search" required placeholder="Search Task" class="bg-gray-200 border border-gray-200 rounded px-4 py-1 focus:ring-blue-500">
-                            </div>
-                            <div class="flex flex-col items-center justify-center">
-                                <input type="submit" value="🔍" class="bg-blue-500 text-xs hover:bg-blue-700 cursor-pointer text-white font-bold py-2 px-4 rounded">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-            <!-- Add a clear search button if search is active -->
-            {% if request.GET.search %}
-            <div class="flex flex-col justify-center mb-4 mt-2 sm:flex-row">
-                <h2 class="text-2xl font-bold text-center">Tasks containing "{{ request.GET.search }}"</h2>
-                
-                <a href="/tasks/"
-                    class="bg-blue-500 sm:ml-2 text-center mt-1 hover:bg-blue-700 text-white font-thin text-xs py-2 px-4 rounded">
-                    Clear search
-                </a>
-            </div>
-            {% else %}
-            <div class="mb-2">
-                <h2 class="text-2xl font-bold text-center">Tasks</h2>
-                <p class="text-center">
-                    Tasks sorted by priority.
-                </p>
-            </div>
-            <!-- PLus button svg -->
-            <div class="flex justify-center">
-            <button type="button" class="bg-blue-500 text-xs hover:bg-blue-700 cursor-pointer text-white font-bold py-2 px-4 rounded" onclick="document.location.href='/add-task/'">Add</button>
-            </div>
-            {% endif %}
-            <!-- <div class="flex flex-col items-center justify-center">
-                <a href=""
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Create a new task
-                </a>
-            </div> -->
-            <!-- List uncompleted tasks -->
-            <div>
-                <div class="sm:space-y-2">
-                    {% if tasks %}
-                    {% for task in tasks %}
-                    <div class="flex flex-row ">
-                        <div class="">
-                            <p class="text-xl font-bold ">
-                                {{ task.title }}&nbsp;<sup class="font-thin">{{task.priority}}</sup>
-                                 <!-- Display date -->
-                            <span class="text-xs text-gray-500 font-extralight block">
-                                {{ task.date_created }}
-                            </span>
-                            </p>
-                        </div>
-                        <div class="flex flex-row ml-auto order-last">
-                            &nbsp;&nbsp;
-                            <a href="/complete_task/{{task.id}}"
-                                class="bg-green-500 text-xs hover:bg-green-700 text-white py-1 px-2 rounded max-h-7">
-                                <!-- tick mark -->
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
-                            </a>
-                            &nbsp;&nbsp;
-                            <a href="/delete-task/{{task.id}}" class="bg-red-500 text-xs hover:bg-red-700 text-white py-1 px-2 rounded max-h-7">
-                                <!-- Delete mark -->
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M6 2l2-2h4l2 2h4v2H2V2h4zM3 6h14l-1 14H4L3 6zm5 2v10h1V8H8zm3 0v10h1V8h-1z"/></svg>
-                            </a>
-                        </div>
+<!-- View all tasks page -->
+{% extends "task_base.html" %}
+{% block taskent %}
+                {% if tasks %}
+                {% for task in tasks %}
+                <div class="flex flex-row bg-gray-100 px-8 py-4 rounded-full shadow-xl">
+                    <div class="">
+                        <p class="text-xl font-medium ">
+                            <span class="{% if task.completed %}text-red-500 line-through{%endif%}">{{ task.title }}</span>&nbsp;<sup class="font-thin">{{task.priority}}</sup>
+                             <!-- Display date -->
+                        <span class="text-xs font-extralight block">
+                            {{ task.date_created }}
+                        </span>
+                        </p>
                     </div>
-                    {% endfor %}
-                    {% else %}
-                    <p class="text-center text-xl font-bold">
-                        You have no tasks.
-                    </p>
-                    {% endif %}
-                    <!-- Page selector -->
-                    <div class="flex flex-row justify-center mt-2">
-                    {% for page in paginator.page_range %}
+                    <div class="flex flex-row items-center ml-auto order-last">
+                        {% if not task.completed %}
                         &nbsp;&nbsp;
-                        <a href={% if request.GET.search %}"/tasks/?page={{page}}&search={{request.GET.search}}" {% else %}"/tasks/?page={{page}}" {% endif %}
-                            class="bg-blue-500 text-xs hover:bg-blue-700 text-white py-1 px-2 rounded max-h-7">
-                            {{page}}
+                        <a href="/complete_task/{{task.id}}"
+                            class="bg-green-500 text-xs hover:bg-green-700 text-white py-2 px-2 rounded-lg">
+                            <!-- tick mark -->
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
                         </a>
-                        {% endfor %}
+                        {% endif %}
+                        &nbsp;&nbsp;
+                        <a href="/edit-task/{{task.id}}" class="bg-blue-500 text-xs hover:bg-blue-700 text-white py-2 px-2 rounded-lg">
+                            <!-- Edit mark -->
+                            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                            width="24" height="24"
+                            viewBox="0 0 24 24"
+                            class="fill-current h-4 w-4">    <path d="M 18.414062 2 C 18.158062 2 17.902031 2.0979687 17.707031 2.2929688 L 15.707031 4.2929688 L 14.292969 5.7070312 L 3 17 L 3 21 L 7 21 L 21.707031 6.2929688 C 22.098031 5.9019687 22.098031 5.2689063 21.707031 4.8789062 L 19.121094 2.2929688 C 18.926094 2.0979687 18.670063 2 18.414062 2 z M 18.414062 4.4140625 L 19.585938 5.5859375 L 18.292969 6.8789062 L 17.121094 5.7070312 L 18.414062 4.4140625 z M 15.707031 7.1210938 L 16.878906 8.2929688 L 6.171875 19 L 5 19 L 5 17.828125 L 15.707031 7.1210938 z"></path></svg>
+                        </a>
+                        &nbsp;&nbsp;
+                        <a href="/delete-task/{{task.id}}" class="bg-red-500 text-xs hover:bg-red-700 text-white py-2 px-2 rounded-lg">
+                            <!-- Delete mark -->
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M6 2l2-2h4l2 2h4v2H2V2h4zM3 6h14l-1 14H4L3 6zm5 2v10h1V8H8zm3 0v10h1V8h-1z"/></svg>
+                        </a>
                     </div>
                 </div>
+                <hr>
+                {% endfor %}
+                {% else %}
+                <p class="text-center text-xl font-bold">
+                    You have no tasks.
+                </p>
+                {% endif %}
             </div>
         </div>
-    </div>
-</div>
 {% endblock %}

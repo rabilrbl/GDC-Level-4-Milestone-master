@@ -63,7 +63,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+                'django.contrib.messages.context_processors.messages'
             ],
         },
     },
@@ -113,6 +113,7 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+TIME_ZONE = 'Asia/Kolkata'
 
 
 # Static files (CSS, JavaScript, Images)
@@ -132,6 +133,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 if not DEBUG:
     import django_heroku
     django_heroku.settings(locals())
-
-USE_TZ = True
-TIME_ZONE = 'Asia/Kolkata'
