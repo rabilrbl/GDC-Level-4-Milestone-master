@@ -1,4 +1,8 @@
+from re import search
 from django.shortcuts import redirect, render
+
+from django.views import View
+from django.views.generic.list import ListView
 
 # import the Task model
 from tasks.models import Task
@@ -7,29 +11,56 @@ from tasks.models import Task
 # Create your views here.
 def index(request):
     return redirect('tasks')
-# Add a new task
-def add_task(request):
-    # get the task as parameter
-    task = request.GET.get('task')
-    priority = request.GET.get('priority')
-    # check if priority exists in the database
-    exist_priority = Task.objects.filter(priority=priority, completed=False).exists()
-    # if priority exists in the database
-    if exist_priority:
-        # increment the existing priority until it is unique
-        new_priority = int(priority) + 1
-        exist_priority = Task.objects.filter(priority=new_priority, completed=False).exists()
-        while exist_priority:
-            new_priority += 1
+
+class AddTaskView(View):
+    def get(self, request):
+        return render(request, 'create_task.html')
+    def post(self, request):
+        # get the task as parameter
+        task = request.POST.get('task')
+        priority = request.POST.get('priority')
+        # check if priority exists in the database
+        exist_priority = Task.objects.filter(priority=priority, completed=False).exists()
+        # if priority exists in the database
+        if exist_priority:
+            # increment the existing priority until it is unique
+            new_priority = int(priority) + 1
             exist_priority = Task.objects.filter(priority=new_priority, completed=False).exists()
-        # save
-        Task.objects.filter(priority=priority).update(priority=new_priority)
-    # create a new task
-    new_task = Task(title=task, completed=False, priority=priority)
-    # save the task
-    new_task.save()
-    # redirect to the tasks view
-    return redirect('tasks')
+            while exist_priority:
+                new_priority += 1
+                exist_priority = Task.objects.filter(priority=new_priority, completed=False).exists()
+            # save
+            Task.objects.filter(priority=priority).update(priority=new_priority)
+        # create a new task
+        new_task = Task(title=task, completed=False, priority=priority)
+        # save the task
+        new_task.save()
+        # redirect to page where task was added
+        return redirect('tasks')
+
+# Add a new task
+# def add_task(request):
+#     # get the task as parameter
+#     task = request.GET.get('task')
+#     priority = request.GET.get('priority')
+#     # check if priority exists in the database
+#     exist_priority = Task.objects.filter(priority=priority, completed=False).exists()
+#     # if priority exists in the database
+#     if exist_priority:
+#         # increment the existing priority until it is unique
+#         new_priority = int(priority) + 1
+#         exist_priority = Task.objects.filter(priority=new_priority, completed=False).exists()
+#         while exist_priority:
+#             new_priority += 1
+#             exist_priority = Task.objects.filter(priority=new_priority, completed=False).exists()
+#         # save
+#         Task.objects.filter(priority=priority).update(priority=new_priority)
+#     # create a new task
+#     new_task = Task(title=task, completed=False, priority=priority)
+#     # save the task
+#     new_task.save()
+#     # redirect to page where task was added
+#     return redirect('tasks')
 
 # Delete a task
 def delete_task(request, task_id):
@@ -51,14 +82,19 @@ def complete_task(request, task_id):
     return redirect('tasks')
 
 # View all tasks
-def tasks(request):
-    search_term = request.GET.get('search')
-    if search_term:
-        tasks = Task.objects.filter(title__icontains=search_term, completed=False).order_by('priority')
-    else:
-        tasks = Task.objects.filter(completed=False).order_by('priority')
-    # render the tasks
-    return render(request, 'tasks.html', {'tasks': tasks})
+
+class GenericListView(ListView):
+    template_name = 'tasks.html'
+    context_object_name = 'tasks'
+    paginate_by = 5
+
+    def get_queryset(self):
+        search_query = self.request.GET.get('search')
+        if search_query:
+            queryset = Task.objects.filter(title__icontains=search_query, completed=False).order_by('priority')
+        else:
+            queryset = Task.objects.filter(completed=False).order_by('priority')
+        return queryset
 
 # View all completed tasks
 def completed_tasks(request):

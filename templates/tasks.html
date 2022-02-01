@@ -6,27 +6,6 @@
     <div class="w-full max-w-[50rem] mx-auto">
         <!-- Add task from -->
         <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col sm:flex-row sm:justify-around sm:space-x-5 space-y-5 sm:space-y-0">
-            <div class="add-task">
-                <div class="mb-4">
-                    <h2 class="text-xl font-bold text-center">Add task</h2>
-                    <p class="text-center">
-                        Add a new task with priority.
-                    </p>
-                </div>
-                <div class="flex flex-col items-center justify-center">
-                    <form action="/add-task/" method="get">
-                        <div class="flex flex-row items-center justify-center">
-                            <div class="flex flex-row items-center justify-center">
-                                <input type="text" name="task"  required placeholder="Task" class="bg-gray-200 border border-gray-200 rounded px-4 py-1 focus:ring-blue-500">
-                                <input type="number" required name="priority" value="1" placeholder="P" class="bg-gray-200 border border-gray-200 rounded px-1 py-1 w-12 focus:ring-blue-500">
-                            </div>
-                            <div class="flex flex-col items-center justify-center">
-                                <input type="submit" value="Add" class="bg-blue-500 text-xs hover:bg-blue-700 cursor-pointer text-white font-bold py-2 px-4 rounded">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
             <!-- Search form -->
             <div class="search-task">
                 <div class="mb-4">
@@ -50,12 +29,28 @@
             </div>
         </div>
         <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-            <div class="mb-4">
+            <!-- Add a clear search button if search is active -->
+            {% if request.GET.search %}
+            <div class="flex flex-col justify-center mb-4 mt-2 sm:flex-row">
+                <h2 class="text-2xl font-bold text-center">Tasks containing "{{ request.GET.search }}"</h2>
+                
+                <a href="/tasks/"
+                    class="bg-blue-500 sm:ml-2 text-center mt-1 hover:bg-blue-700 text-white font-thin text-xs py-2 px-4 rounded">
+                    Clear search
+                </a>
+            </div>
+            {% else %}
+            <div class="mb-2">
                 <h2 class="text-2xl font-bold text-center">Tasks</h2>
                 <p class="text-center">
-                    Here you can see all pending tasks with priority.
+                    Tasks sorted by priority.
                 </p>
             </div>
+            <!-- PLus button svg -->
+            <div class="flex justify-center">
+            <button type="button" class="bg-blue-500 text-xs hover:bg-blue-700 cursor-pointer text-white font-bold py-2 px-4 rounded" onclick="document.location.href='/add-task/'">Add</button>
+            </div>
+            {% endif %}
             <!-- <div class="flex flex-col items-center justify-center">
                 <a href=""
                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
@@ -63,7 +58,7 @@
                 </a>
             </div> -->
             <!-- List uncompleted tasks -->
-            <div class="mb-4">
+            <div>
                 <div class="sm:space-y-2">
                     {% if tasks %}
                     {% for task in tasks %}
@@ -97,6 +92,16 @@
                         You have no tasks.
                     </p>
                     {% endif %}
+                    <!-- Page selector -->
+                    <div class="flex flex-row justify-center mt-2">
+                    {% for page in paginator.page_range %}
+                        &nbsp;&nbsp;
+                        <a href={% if request.GET.search %}"/tasks/?page={{page}}&search={{request.GET.search}}" {% else %}"/tasks/?page={{page}}" {% endif %}
+                            class="bg-blue-500 text-xs hover:bg-blue-700 text-white py-1 px-2 rounded max-h-7">
+                            {{page}}
+                        </a>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>

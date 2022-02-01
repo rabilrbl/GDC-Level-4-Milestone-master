@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Form to add task -->
+<div class="flex flex-col items-center justify-center">
+    <!-- List all tasks -->
+    <div class="w-full max-w-[50rem] mx-auto">
+        <!-- Add task from -->
+        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col sm:flex-row sm:justify-around sm:space-x-5 space-y-5 sm:space-y-0">
+            <div class="add-task">
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-center">Add task</h2>
+                    <p class="text-center">
+                        Add a new task with priority.
+                    </p>
+                </div>
+                <div class="flex flex-col items-center justify-center">
+                    <form action="/add-task/" method="post">
+                        <div class="flex flex-row items-center justify-center">
+                            <div class="flex flex-row items-center justify-center">
+                                <input type="text" name="task"  required placeholder="Task" class="bg-gray-200 border border-gray-200 rounded px-4 py-1 focus:ring-blue-500">
+                                <input type="number" required name="priority" value="1" placeholder="P" class="bg-gray-200 border border-gray-200 rounded px-1 py-1 w-12 focus:ring-blue-500">
+                            </div>
+                            <div class="flex flex-col items-center justify-center">
+                                {% csrf_token %}
+                                <input type="submit" value="Add" class="bg-blue-500 text-xs hover:bg-blue-700 cursor-pointer text-white font-bold py-2 px-4 rounded">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
