@@ -5,11 +5,19 @@
     <!-- List all tasks -->
     <div class="w-full max-w-lg mx-auto">
         <!-- Add task from -->
-        {% if request.GET.search_active_bar %}
-        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col sm:flex-row sm:justify-around sm:space-x-5 space-y-5 sm:space-y-0">
+        {% if request.GET.search_active_bar == "true" %}
+        <div class="bg-blue-50 shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col">
             <!-- Search form -->
             <div class="search-task">
                 <div class="mb-4">
+                    <!-- Close Button -->
+                    <div class="float-right">
+                        <a href="?search_active_bar=false"
+                            class="border border-red-200 text-center mt-1 hover:bg-red-200 text-white font-thin text-xs py-2 px-4 rounded-full">
+                            <!-- close button -->
+                            ❌
+                        </a>
+                    </div>
                     <h2 class="text-xl font-bold text-center">Search task</h2>
                     <p class="text-center">
                         Search for a task title.
@@ -20,6 +28,7 @@
                         <div class="flex flex-row items-center justify-center">
                             <div class="flex flex-col items-center justify-center">
                                 <input type="text" name="search" required placeholder="Search Task" class="bg-gray-200 border border-gray-200 rounded px-4 py-1 focus:ring-blue-500">
+                                <input type="hidden" name="search_active_bar" value="true">
                             </div>
                             <div class="flex flex-col items-center justify-center">
                                 <input type="submit" value="🔍" class="bg-blue-500 text-xs hover:bg-blue-700 cursor-pointer text-white font-bold py-2 px-4 rounded">
@@ -30,28 +39,46 @@
             </div>
         </div>
         {% endif %}
-        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div class="bg-blue-50 shadow-md rounded px-8 pt-6 pb-8 mb-4">
             <!-- Add a clear search button if search is active -->
             {% if request.GET.search %}
+            <a href="?search_active_bar=false"
+                    class="bg-blue-500 rounded-full sm:ml-2 text-center mt-1 hover:bg-blue-700 text-white font-thin text-xs py-2 px-4 float-right">
+                    Clear
+                </a>
             <div class="flex flex-col justify-center mb-4 mt-2 sm:flex-row">
                 <h2 class="text-2xl font-bold text-center">Tasks containing "{{ request.GET.search }}"</h2>
-                
-                <a href="/tasks/"
-                    class="bg-blue-500 sm:ml-2 text-center mt-1 hover:bg-blue-700 text-white font-thin text-xs py-2 px-4 rounded">
-                    Clear search
-                </a>
             </div>
             {% else %}
-                <div class="mb-2">
-                    <h2 class="text-2xl font-bold text-center">Hi Rabil</h2>
-                    <p class="text-center">
-                        Pending Tasks.
-                    </p>
+            <!-- Search Button -->
+            <div class="float-left">
+                <a href="?search_active_bar=true"
+                    class="border border-blue-200 text-center mt-1 hover:bg-blue-200 text-white font-thin text-xs py-2 px-4 rounded-full">
+                    <!-- search icon -->
+                    🔍
+                </a>
+            </div>
+            <div class="float-right">
+                <a href="/user/logout"
+                    class="border border-red-500 text-center font-medium hover:bg-red-500 text-xs text-red-500 hover:text-white py-2 px-4 rounded-full">
+                    <!-- search icon -->
+                    Log Out
+                </a>
+            </div>
+                <div class="flex justify-center">
+                    <div class="mb-2 order-0 ">
+                        <h2 class="text-2xl text-center">Hi <span class="capitalize font-bold">{{ request.user }}</span></h2>
+                        <p class="text-center mt-2">
+                            {{ completed_tasks }} of {{ total_tasks }} tasks completed
+                        </p>
+                    </div>
                 </div>
-                <ul class="flex justify-around m-2 font-medium my-6 overflow-x-auto">
-                    <li {% if request.resolver_match.url_name == "all-tasks" %}class="bg-blue-200 text-blue-600 py-1 px-4 rounded-full"{% endif %}><a href="{% url 'all-tasks' %}">All</a></li>
-                    <li {% if request.resolver_match.url_name == "tasks" %}class="bg-blue-200 text-blue-600 py-1 px-4 rounded-full"{% endif %}><a href="{% url 'tasks' %}">Pending</a></li>
-                    <li {% if request.resolver_match.url_name == "completed-tasks" %}class="bg-blue-200 text-blue-600 py-1 px-4 rounded-full"{% endif %}><a href="{% url 'completed-tasks' %}">Completed</a></li>
+                <ul class="flex justify-center m-2 font-medium mt-5">
+                    {% with active="bg-blue-200 text-blue-600 rounded-full" default="py-1 px-4 mx-2" hover="hover:underline hover:text-blue-600" %}
+                    <li class="{% if request.resolver_match.url_name == "all-tasks" %} {{ active }} {% else %} {{ hover }} {% endif %} {{ default }}"><a href="{% url 'all-tasks' %}">&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;</a></li>
+                    <li class="{% if request.resolver_match.url_name == "tasks" %} {{ active }} {% else %} {{ hover }} {% endif %} {{ default }}"><a href="{% url 'tasks' %}">&nbsp;Pending&nbsp;</a></li>
+                    <li class="{% if request.resolver_match.url_name == "completed-tasks" %} {{ active }} {% else %} {{ hover }} {% endif %} {{ default }}"><a href="{% url 'completed-tasks' %}">Completed</a></li>
+                    {% endwith %}
                 </ul>
             <!-- PLus button svg -->
             <div class="flex justify-center">
@@ -65,20 +92,20 @@
             </div> -->
             <!-- List uncompleted tasks -->
             <div>
-                <div class="sm:space-y-2">
+                <div class="">
                     {% block taskent %}
                     {% endblock %}
                     <!-- Page selector -->
-                    <div class="flex flex-row justify-center my-4">
+                    <div class="flex flex-row justify-center my-2">
                     {% for page in paginator.page_range %}
                         &nbsp;&nbsp;
                         <a href="?page={{page}}{% if request.GET.search %}&search={{request.GET.search}}{% endif %}{% if request.GET.search_active_bar %}&search_active_bar={{request.GET.search_active_bar}}{% endif %}"
-                            class="bg-blue-500 text-xs hover:bg-blue-700 text-white py-1 px-2 rounded-full max-h-7">
+                            class="border border-blue-500 bg-blue-50 text-xs font-medium hover:bg-blue-500 text-blue-500 hover:text-white py-1 px-2 rounded-full">
                             {{page}}
                         </a>
                         {% endfor %}
                     </div>
-                    <div class="flex justify-center"><button type="button" class="bg-blue-500 text-xs mt-2 hover:bg-blue-700 cursor-pointer text-white font-bold py-2 px-10 rounded-full" onclick="document.location.href='/create-task/'">Add</button></div>
+                    <div class="flex justify-center"><button type="button" class="mt-2 bg-blue-500 hover:bg-blue-600 cursor-pointer text-white font-medium py-2 px-10 rounded-full w-[20rem] shadow-lg shadow-blue-500/50" onclick="document.location.href='/create-task/?next={% url request.resolver_match.url_name %}'">Add</button></div>
                 </div>
             </div>
         </div>
