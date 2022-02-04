@@ -63,7 +63,8 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages'
+                'django.contrib.messages.context_processors.messages',
+                "tasks.context_processors.task_count"
             ],
         },
     },
@@ -127,6 +128,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = '/tasks/'
+LOGIN_URL = '/user/login/'
+LOGOUT_REDIRECT_URL = '/'
 
 
 # Activate Django-Heroku.

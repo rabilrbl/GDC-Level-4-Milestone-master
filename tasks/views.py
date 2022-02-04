@@ -1,156 +1,191 @@
-from re import search
-from django.shortcuts import redirect, render
 
+from django.shortcuts import redirect, render
 from django.views import View
+from django.http import HttpResponseRedirect
 from django.views.generic.list import ListView
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+
+from django.views.generic.detail import DetailView
 
 from django.forms import ModelForm, ValidationError
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.views import LoginView
 from django import forms
 # import the Task model
 from tasks.models import Task
 
-# Create your views here.
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+class AuthorizedUserMixin(LoginRequiredMixin):
+    def get_queryset(self):
+        return Task.objects.filter(user=self.request.user, deleted=False)
+
+    def get_success_url(self):
+        _from = self.request.POST.get('next')
+        return _from if _from else '/tasks/'
+
+
 def index(request):
-    return redirect('tasks')
+    return render(request, 'index.html')
+
+class LoginView(LoginView):
+    template_name = 'login.html'
+
+    # allow only for unauthenticated users
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('/tasks/')
+        return super().dispatch(request, *args, **kwargs)
+
+    
+    # Add class attributes to customize the form
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Add the form field to the form
+        form.fields['username'].widget.attrs.update({'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-full shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline ring-blue-500 focus:bg-white focus:ring-2'})
+        form.fields['password'].widget.attrs.update({'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-full shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline ring-blue-500 focus:bg-white focus:ring-2'})
+        return form
+
+class SignUpView(CreateView):
+    form_class = UserCreationForm
+    success_url = '/user/login'
+    template_name = 'signup.html'
+
+    # allow only for unauthenticated users
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('/tasks/')
+        return super().dispatch(request, *args, **kwargs)
+
+    # Add class attributes to the form
+    def get_form(self, form_class=None):
+        form = super(SignUpView, self).get_form()
+        form.fields['username'].widget.attrs.update({'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline ring-blue-500 focus:bg-white focus:ring-2'})
+        form.fields['password1'].widget.attrs.update({'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline  ring-blue-500 focus:bg-white focus:ring-2'})
+        form.fields['password2'].widget.attrs.update({'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline  ring-blue-500 focus:bg-white focus:ring-2'})
+        return form
+
 
 class TaskCreateForm(ModelForm):
+    # Add class attributes to customize the form
+    def __init__(self, *args, **kwargs):
+        super(TaskCreateForm, self).__init__(*args, **kwargs)
+        self.fields['title'].widget.attrs.update({'class': 'bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
+        self.fields['priority'].widget.attrs.update({'class': 'bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
+        self.fields['description'].widget.attrs.update({'class': 'caret-blue-500 bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
+        self.fields['completed'].widget.attrs.update({'class': 'bg-gray-50 focus:bg-white px-4 py-2 shadow-lg shadow-blue-200 hover:ring-blue-300 h-5 w-5 bg-blue-500 text-white accent-blue-500 focus:outline-none focus:shadow-outline'})
+
     class Meta:
         model = Task
         fields = ['title', 'priority', 'description', 'completed']
-        widgets = {
-            'title': forms.TextInput(attrs={'class': 'bg-gray-200 border border-gray-200 rounded-lg px-4 py-1 focus:ring-blue-500'}),
-            'priority': forms.NumberInput(attrs={'class': 'bg-gray-200 border border-gray-200 rounded-lg px-4 py-1 focus:ring-blue-500'}),
-            'description': forms.Textarea(attrs={'class': 'bg-gray-200 border border-gray-200 rounded-lg px-4 py-1 focus:ring-blue-500'}),
-            'completed': forms.CheckboxInput(attrs={'class': 'bg-gray-200 rounded-xl px-4 py-1 focus:ring-blue-500 hover:ring-blue-500 h-4 w-4 bg-blue-500'}),
-        }
     
     def clean_title(self):
         title = self.cleaned_data['title']
-        if len(title) < 8:
-            raise ValidationError("Task title must be at least 8 characters long.")
+        if len(title) < 5:
+            raise ValidationError("Task title must be at least 5 characters long.")
         return title.capitalize()
-    
-    def clean_priority(self):
-        priority = self.cleaned_data['priority']
-        exist_priority = Task.objects.filter(priority=priority, completed=False).exists()
+
+
+class updatePriority(AuthorizedUserMixin):
+
+    def __init__(self, priority, completed, request) -> None:
+        self.request = request
+        exist_priority = super().get_queryset().filter(priority=priority, completed=completed).exists()
         # if priority exists in the database
         if exist_priority:
             # increment the existing priority until it is unique
             new_priority = int(priority) + 1
-            exist_priority = Task.objects.filter(priority=new_priority, completed=False).exists()
+            exist_priority = super().get_queryset().filter(priority=new_priority, completed=completed).exists()
             while exist_priority:
                 new_priority += 1
-                exist_priority = Task.objects.filter(priority=new_priority, completed=False).exists()
+                exist_priority = super().get_queryset().filter(priority=new_priority, completed=completed).exists()
             # save
-            Task.objects.filter(priority=priority).update(priority=new_priority)
-        return priority
-        
+            super().get_queryset().filter(priority=priority, completed=completed).update(priority=new_priority)
 
-class CreateTaskView(CreateView):
+class CreateTaskView(AuthorizedUserMixin,CreateView):
     form_class = TaskCreateForm
     template_name = 'create_task.html'
-    success_url = '/tasks/'
+    
+    def form_valid(self, form):
+        # update priority if exists
+        updatePriority(form.instance.priority, form.instance.completed, self.request)
+        # set the user
+        form.instance.user = self.request.user
+        return super().form_valid(form)
 
-class EditTaskView(UpdateView):
+class EditTaskView(AuthorizedUserMixin,UpdateView):
     model = Task
     form_class = TaskCreateForm
     template_name = 'edit_task.html'
-    success_url = '/tasks/'
 
-# class AddTaskView(View):
-#     def get(self, request):
-#         return redirect('create-task')
-#     def post(self, request):
-#         # get the task as parameter
-#         task = request.POST.get('task')
-#         priority = request.POST.get('priority')
-#         # check if priority exists in the database
-#         exist_priority = Task.objects.filter(priority=priority, completed=False).exists()
-#         # if priority exists in the database
-#         if exist_priority:
-#             # increment the existing priority until it is unique
-#             new_priority = int(priority) + 1
-#             exist_priority = Task.objects.filter(priority=new_priority, completed=False).exists()
-#             while exist_priority:
-#                 new_priority += 1
-#                 exist_priority = Task.objects.filter(priority=new_priority, completed=False).exists()
-#             # save
-#             Task.objects.filter(priority=priority).update(priority=new_priority)
-#         # create a new task
-#         new_task = Task(title=task, completed=False, priority=priority)
-#         # save the task
-#         new_task.save()
-#         # redirect to page where task was added
-#         return redirect('tasks')
+    def form_valid(self, form):
+        # update if exists
+        updatePriority(form.instance.priority, form.instance.completed, self.request)
+        return super().form_valid(form)
+
+# Detailed view of a task
+class TaskDetailView(AuthorizedUserMixin,DetailView):
+    model = Task
+    template_name = 'task_detail.html'
+
 
 # Delete a task
-def delete_task(request, task_id):
-    # get the task as parameter
-    task = Task.objects.get(id=task_id)
-    # delete the task
-    task.delete()
-    # redirect to the tasks view
-    return redirect('tasks')
+
+class DeleteTaskView(AuthorizedUserMixin,DeleteView):
+    model = Task
+    template_name = 'delete_task.html'
+
+    # override the delete method to perform soft delete
+    def form_valid(self, form):
+        self.object = self.get_object()
+        self.object.soft_delete()
+        return HttpResponseRedirect(self.get_success_url())
 
 # Complete a task
-def complete_task(request, task_id):
-    # get the task as parameter
-    task = Task.objects.get(id=task_id)
-    task.completed = True
-    # save the task
-    task.save()
-    # redirect to the tasks view
-    return redirect('tasks')
+class CompleteTaskView(AuthorizedUserMixin,View):
+    def get(self, request, *args, **kwargs):
+        task = self.get_queryset().get(pk=self.kwargs['pk'])
+        task.completed = True
+        task.save()
+        _from = request.GET.get('next')
+        return redirect(_from) if _from else redirect('/tasks/')
 
 # View all tasks
 
-class GenericListView(ListView):
+class GenericListView(AuthorizedUserMixin,ListView):
     template_name = 'tasks.html'
     context_object_name = 'tasks'
     paginate_by = 5
 
     def get_queryset(self):
         search_query = self.request.GET.get('search')
+        tasks = super().get_queryset().filter(completed=False).order_by('priority')
         if search_query:
-            queryset = Task.objects.filter(title__icontains=search_query, completed=False).order_by('priority')
-        else:
-            queryset = Task.objects.filter(completed=False).order_by('priority')
-        return queryset
+            tasks = tasks.filter(title__icontains=search_query)
+        return tasks
 
 # View all completed tasks
-class GenericCompletedListView(ListView):
+class GenericCompletedListView(AuthorizedUserMixin,ListView):
     template_name = 'tasks.html'
     context_object_name = 'tasks'
     paginate_by = 5
 
     def get_queryset(self):
         search_query = self.request.GET.get('search')
+        tasks = super().get_queryset().filter(completed=True).order_by('priority')
         if search_query:
-            queryset = Task.objects.filter(title__icontains=search_query, completed=True).order_by('priority')
-        else:
-            queryset = Task.objects.filter(completed=True).order_by('priority')
-        return queryset
-
-# delete  completed task
-def delete_completed_task(request, task_id):
-    # get the task as parameter
-    task = Task.objects.get(id=task_id)
-    # delete the task
-    task.delete()
-    # redirect to the tasks view
-    return redirect('completed-tasks')
+            tasks = tasks.filter(title__icontains=search_query)
+        return tasks
 
 # view all tasks and completed tasks
-class GenericAllTaskView(ListView):
+class GenericAllTaskView(AuthorizedUserMixin,ListView):
     template_name = 'tasks.html'
     context_object_name = 'tasks'
     paginate_by = 5
 
     def get_queryset(self):
         search_query = self.request.GET.get('search')
+        tasks = super().get_queryset().order_by('priority')
         if search_query:
-            queryset = Task.objects.filter(title__icontains=search_query).order_by('priority')
-        else:
-            queryset = Task.objects.all().order_by('priority')
-        return queryset
+            tasks = tasks.filter(title__icontains=search_query)
+        return tasks
