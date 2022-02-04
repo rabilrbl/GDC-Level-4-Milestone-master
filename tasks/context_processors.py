@@ -10,4 +10,3 @@ def task_count(request):
             'total_tasks': 0,
             'completed_tasks': 0
         }
-

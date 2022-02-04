@@ -10,11 +10,11 @@ from django.views.generic.detail import DetailView
 from django.forms import ModelForm, ValidationError
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView
-from django import forms
-# import the Task model
+
 from tasks.models import Task
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 class AuthorizedUserMixin(LoginRequiredMixin):
     def get_queryset(self):
@@ -28,6 +28,7 @@ class AuthorizedUserMixin(LoginRequiredMixin):
 def index(request):
     return render(request, 'index.html')
 
+
 class LoginView(LoginView):
     template_name = 'login.html'
 
@@ -37,14 +38,17 @@ class LoginView(LoginView):
             return redirect('/tasks/')
         return super().dispatch(request, *args, **kwargs)
 
-    
     # Add class attributes to customize the form
+
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         # Add the form field to the form
-        form.fields['username'].widget.attrs.update({'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-full shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline ring-blue-500 focus:bg-white focus:ring-2'})
-        form.fields['password'].widget.attrs.update({'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-full shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline ring-blue-500 focus:bg-white focus:ring-2'})
+        form.fields['username'].widget.attrs.update(
+            {'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-full shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline ring-blue-500 focus:bg-white focus:ring-2'})
+        form.fields['password'].widget.attrs.update(
+            {'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-full shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline ring-blue-500 focus:bg-white focus:ring-2'})
         return form
+
 
 class SignUpView(CreateView):
     form_class = UserCreationForm
@@ -60,9 +64,12 @@ class SignUpView(CreateView):
     # Add class attributes to the form
     def get_form(self, form_class=None):
         form = super(SignUpView, self).get_form()
-        form.fields['username'].widget.attrs.update({'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline ring-blue-500 focus:bg-white focus:ring-2'})
-        form.fields['password1'].widget.attrs.update({'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline  ring-blue-500 focus:bg-white focus:ring-2'})
-        form.fields['password2'].widget.attrs.update({'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline  ring-blue-500 focus:bg-white focus:ring-2'})
+        form.fields['username'].widget.attrs.update(
+            {'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline ring-blue-500 focus:bg-white focus:ring-2'})
+        form.fields['password1'].widget.attrs.update(
+            {'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline  ring-blue-500 focus:bg-white focus:ring-2'})
+        form.fields['password2'].widget.attrs.update(
+            {'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline  ring-blue-500 focus:bg-white focus:ring-2'})
         return form
 
 
@@ -70,19 +77,24 @@ class TaskCreateForm(ModelForm):
     # Add class attributes to customize the form
     def __init__(self, *args, **kwargs):
         super(TaskCreateForm, self).__init__(*args, **kwargs)
-        self.fields['title'].widget.attrs.update({'class': 'bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
-        self.fields['priority'].widget.attrs.update({'class': 'bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
-        self.fields['description'].widget.attrs.update({'class': 'caret-blue-500 bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
-        self.fields['completed'].widget.attrs.update({'class': 'bg-gray-50 focus:bg-white px-4 py-2 shadow-lg shadow-blue-200 hover:ring-blue-300 h-5 w-5 bg-blue-500 text-white accent-blue-500 focus:outline-none focus:shadow-outline'})
+        self.fields['title'].widget.attrs.update(
+            {'class': 'bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
+        self.fields['priority'].widget.attrs.update(
+            {'class': 'bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
+        self.fields['description'].widget.attrs.update(
+            {'class': 'caret-blue-500 bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
+        self.fields['completed'].widget.attrs.update(
+            {'class': 'bg-gray-50 focus:bg-white px-4 py-2 shadow-lg shadow-blue-200 hover:ring-blue-300 h-5 w-5 bg-blue-500 text-white accent-blue-500 focus:outline-none focus:shadow-outline'})
 
     class Meta:
         model = Task
         fields = ['title', 'priority', 'description', 'completed']
-    
+
     def clean_title(self):
         title = self.cleaned_data['title']
         if len(title) < 5:
-            raise ValidationError("Task title must be at least 5 characters long.")
+            raise ValidationError(
+                "Task title must be at least 5 characters long.")
         return title.capitalize()
 
 
@@ -90,48 +102,58 @@ class updatePriority(AuthorizedUserMixin):
 
     def __init__(self, priority, completed, request) -> None:
         self.request = request
-        exist_priority = super().get_queryset().filter(priority=priority, completed=completed).exists()
+        exist_priority = super().get_queryset().filter(
+            priority=priority, completed=completed).exists()
         # if priority exists in the database
         if exist_priority:
             # increment the existing priority until it is unique
             new_priority = int(priority) + 1
-            exist_priority = super().get_queryset().filter(priority=new_priority, completed=completed).exists()
+            exist_priority = super().get_queryset().filter(
+                priority=new_priority, completed=completed).exists()
             while exist_priority:
                 new_priority += 1
-                exist_priority = super().get_queryset().filter(priority=new_priority, completed=completed).exists()
+                exist_priority = super().get_queryset().filter(
+                    priority=new_priority, completed=completed).exists()
             # save
-            super().get_queryset().filter(priority=priority, completed=completed).update(priority=new_priority)
+            super().get_queryset().filter(priority=priority,
+                                          completed=completed).update(priority=new_priority)
 
-class CreateTaskView(AuthorizedUserMixin,CreateView):
+
+class CreateTaskView(AuthorizedUserMixin, CreateView):
     form_class = TaskCreateForm
     template_name = 'create_task.html'
-    
+
     def form_valid(self, form):
         # update priority if exists
-        updatePriority(form.instance.priority, form.instance.completed, self.request)
+        updatePriority(form.instance.priority,
+                       form.instance.completed, self.request)
         # set the user
         form.instance.user = self.request.user
         return super().form_valid(form)
 
-class EditTaskView(AuthorizedUserMixin,UpdateView):
+
+class EditTaskView(AuthorizedUserMixin, UpdateView):
     model = Task
     form_class = TaskCreateForm
     template_name = 'edit_task.html'
 
     def form_valid(self, form):
         # update if exists
-        updatePriority(form.instance.priority, form.instance.completed, self.request)
+        updatePriority(form.instance.priority,
+                       form.instance.completed, self.request)
         return super().form_valid(form)
 
 # Detailed view of a task
-class TaskDetailView(AuthorizedUserMixin,DetailView):
+
+
+class TaskDetailView(AuthorizedUserMixin, DetailView):
     model = Task
     template_name = 'task_detail.html'
 
 
 # Delete a task
 
-class DeleteTaskView(AuthorizedUserMixin,DeleteView):
+class DeleteTaskView(AuthorizedUserMixin, DeleteView):
     model = Task
     template_name = 'delete_task.html'
 
@@ -142,7 +164,9 @@ class DeleteTaskView(AuthorizedUserMixin,DeleteView):
         return HttpResponseRedirect(self.get_success_url())
 
 # Complete a task
-class CompleteTaskView(AuthorizedUserMixin,View):
+
+
+class CompleteTaskView(AuthorizedUserMixin, View):
     def get(self, request, *args, **kwargs):
         task = self.get_queryset().get(pk=self.kwargs['pk'])
         task.completed = True
@@ -152,7 +176,8 @@ class CompleteTaskView(AuthorizedUserMixin,View):
 
 # View all tasks
 
-class GenericListView(AuthorizedUserMixin,ListView):
+
+class GenericListView(AuthorizedUserMixin, ListView):
     template_name = 'tasks.html'
     context_object_name = 'tasks'
     paginate_by = 5
@@ -165,7 +190,9 @@ class GenericListView(AuthorizedUserMixin,ListView):
         return tasks
 
 # View all completed tasks
-class GenericCompletedListView(AuthorizedUserMixin,ListView):
+
+
+class GenericCompletedListView(AuthorizedUserMixin, ListView):
     template_name = 'tasks.html'
     context_object_name = 'tasks'
     paginate_by = 5
@@ -178,7 +205,9 @@ class GenericCompletedListView(AuthorizedUserMixin,ListView):
         return tasks
 
 # view all tasks and completed tasks
-class GenericAllTaskView(AuthorizedUserMixin,ListView):
+
+
+class GenericAllTaskView(AuthorizedUserMixin, ListView):
     template_name = 'tasks.html'
     context_object_name = 'tasks'
     paginate_by = 5

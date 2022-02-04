@@ -6,7 +6,7 @@
     <div class="w-full max-w-lg mx-auto">
         <!-- Add task from -->
         {% if request.GET.search_active_bar == "true" %}
-        <div class="bg-blue-50 shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col">
+        <div class="bg-blue-50 shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col rounded-xl">
             <!-- Search form -->
             <div class="search-task">
                 <div class="mb-4">
@@ -39,7 +39,7 @@
             </div>
         </div>
         {% endif %}
-        <div class="bg-blue-50 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div class="bg-blue-50 shadow-md rounded-xl px-8 pt-6 pb-8 mb-4">
             <!-- Add a clear search button if search is active -->
             {% if request.GET.search %}
             <a href="?search_active_bar=false"
@@ -74,10 +74,10 @@
                     </div>
                 </div>
                 <ul class="flex justify-center m-2 font-medium mt-5">
-                    {% with active="bg-blue-200 text-blue-600 rounded-full" default="py-1 px-4 mx-2" hover="hover:underline hover:text-blue-600" %}
-                    <li class="{% if request.resolver_match.url_name == "all-tasks" %} {{ active }} {% else %} {{ hover }} {% endif %} {{ default }}"><a href="{% url 'all-tasks' %}">&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;</a></li>
-                    <li class="{% if request.resolver_match.url_name == "tasks" %} {{ active }} {% else %} {{ hover }} {% endif %} {{ default }}"><a href="{% url 'tasks' %}">&nbsp;Pending&nbsp;</a></li>
-                    <li class="{% if request.resolver_match.url_name == "completed-tasks" %} {{ active }} {% else %} {{ hover }} {% endif %} {{ default }}"><a href="{% url 'completed-tasks' %}">Completed</a></li>
+                    {% with page=request.resolver_match.url_name active="bg-blue-200 text-blue-600 rounded-full" default="py-1 px-4 mx-2" hover="hover:underline hover:text-blue-600" %}
+                    <li class="{% if page == "all-tasks" %} {{ active }} {% else %} {{ hover }} {% endif %} {{ default }}"><a href="{% url 'all-tasks' %}">&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;</a></li>
+                    <li class="{% if page == "tasks" %} {{ active }} {% else %} {{ hover }} {% endif %} {{ default }}"><a href="{% url 'tasks' %}">&nbsp;Pending&nbsp;</a></li>
+                    <li class="{% if page == "completed-tasks" %} {{ active }} {% else %} {{ hover }} {% endif %} {{ default }}"><a href="{% url 'completed-tasks' %}">Completed</a></li>
                     {% endwith %}
                 </ul>
             <!-- PLus button svg -->
