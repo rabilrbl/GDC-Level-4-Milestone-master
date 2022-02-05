@@ -6,32 +6,29 @@
     <div class="w-full max-w-lg mx-auto">
         <!-- Add task from -->
         {% if request.GET.search_active_bar == "true" %}
-        <div class="bg-blue-50 shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col rounded-xl">
+        <div class="bg-blue-50 shadow-md rounded px-8 pt-6 pb-8 mb-2 flex flex-col rounded-xl">
             <!-- Search form -->
             <div class="search-task">
                 <div class="mb-4">
                     <!-- Close Button -->
-                    <div class="float-right">
+                    <div class="float-right flex">
                         <a href="?search_active_bar=false"
-                            class="flex text-red-500 border border-red-500 px-2 py-1 rounded-full hover:bg-red-500 hover:text-white shadow shadow-red-500">
+                            class="text-red-500 text-xs items-center p-1 shadow shadow-red-300 rounded-full hover:bg-red-500 hover:text-white">
                             <!-- close button -->
                             {{ close|safe }}
                         </a>
                     </div>
-                    <h2 class="text-xl font-bold text-center">Search task</h2>
-                    <p class="text-center">
-                        Search for a task title.
-                    </p>
+                    <h2 class="text-xl font-bold text-center text-gray-600">Search task</h2>
                 </div>
                 <div class="flex flex-col items-center justify-center">
                     <form action="" method="get">
                         <div class="flex flex-row items-center justify-center">
                             <div class="flex flex-col items-center justify-center">
-                                <input type="text" name="search" required placeholder="Search Task" class="bg-gray-200 border border-gray-200 rounded px-4 py-1 focus:ring-blue-500">
+                                <input type="text" name="search" required placeholder="Title" class="bg-gray-100 shadow shadow-blue-500 rounded-full px-4 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-gray-50 focus:outline-none">
                                 <input type="hidden" name="search_active_bar" value="true">
                             </div>
                             <div class="flex flex-col items-center justify-center">
-                                <button type="submit" class="bg-blue-500 text-xs hover:bg-blue-700 cursor-pointer text-white font-bold py-2 px-4 rounded">
+                                <button type="submit" class="hover:bg-blue-500 ml-1 hover:text-white shadow shadow-blue-500 cursor-pointer text-blue-500 font-bold py-2 px-2 rounded-full ">
                                     {{ search|safe }}
                                 </button>
                             </div>
@@ -51,7 +48,7 @@
                 </svg>&nbsp;Clear
                 </a>
             <div class="flex flex-col justify-center mb-4 mt-2 sm:flex-row">
-                <h2 class="text-2xl font-bold text-center">Tasks containing "{{ request.GET.search }}"</h2>
+                <h2 class="text-2xl font-bold text-center truncate">Tasks containing "{{ request.GET.search }}"</h2>
             </div>
             {% else %}
             <!-- Search Button -->
@@ -102,16 +99,18 @@
                 <div class="">
                     {% block taskent %}
                     {% endblock %}
+                    {% if paginator.page_range|length > 1 %}
                     <!-- Page selector -->
-                    <div class="flex flex-row justify-center my-2">
+                    <div class="flex flex-row justify-center items-center my-2">
                     {% for page in paginator.page_range %}
                         &nbsp;&nbsp;
                         <a href="?page={{page}}{% if request.GET.search %}&search={{request.GET.search}}{% endif %}{% if request.GET.search_active_bar %}&search_active_bar={{request.GET.search_active_bar}}{% endif %}"
-                            class="border border-blue-500 bg-blue-50 text-xs font-medium hover:bg-blue-500 text-blue-500 hover:text-white py-1 px-2 rounded-full">
+                            class="border border-blue-500 bg-blue-50 text-xs text-center font-medium hover:bg-blue-500 text-blue-500 hover:text-white px-2 py-1 rounded-full">
                             {{page}}
                         </a>
                         {% endfor %}
                     </div>
+                    {% endif %}
                     <div class="flex justify-center"><button type="button" class="mt-2 bg-blue-500 hover:bg-blue-600 cursor-pointer text-white font-medium py-2 px-10 rounded-full w-[20rem] shadow-lg shadow-blue-500/50" onclick="document.location.href='/create-task/?next={% url request.resolver_match.url_name %}'">Add</button></div>
                 </div>
             </div>
