@@ -54,14 +54,14 @@
             <!-- Search Button -->
             <div class="block float-left">
                 <a href="?search_active_bar=true"
-                    class="flex items-center rounded-full shadow shadow-blue-500 text-xs text-center text-blue-500 hover:bg-blue-500 hover:text-white py-2 px-4">
+                    class="flex items-center rounded-full shadow shadow-blue-500 text-xs text-center text-blue-500 hover:bg-blue-500 hover:text-white py-2 px-3">
                     <!-- search icon -->
                     {{ search|safe }}&nbsp;Search
                 </a>
             </div>
             <div class="block float-right">
-                <a href="/user/logout"
-                    class="flex border border-red-500 shadow shadow-red-500 text-center font-medium hover:bg-red-500 text-xs text-red-500 hover:text-white py-2 px-4 rounded-full">
+                <a href="{% url 'logout' %}"
+                    class="flex border border-red-500 shadow shadow-red-500 text-center font-medium hover:bg-red-500 text-xs text-red-500 hover:text-white py-2 px-3 rounded-full">
                     <!-- logout icon -->
                     Logout&nbsp;
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -72,12 +72,12 @@
                 <div class="flex items-center justify-center">
                     <div class="mb-2 order-0 ">
                         <h2 class=" text-2xl text-center">Hi <span class="capitalize font-bold">{{ request.user }}</span></h2>
-                        <p class="text-center mt-2">
+                        <p class="text-center">
                             {{ completed_tasks }} of {{ total_tasks }} tasks completed
                         </p>
                     </div>
                 </div>
-                <ul class="flex justify-center m-2 font-medium mt-5">
+                <ul class="flex justify-center mt-2 font-medium">
                     {% with page=request.resolver_match.url_name active="bg-blue-200 text-blue-600 rounded-full" default="py-1 px-4 mx-2" hover="hover:underline hover:text-blue-600" %}
                     <li class="{% if page == "all-tasks" %} {{ active }} {% else %} {{ hover }} {% endif %} {{ default }}"><a href="{% url 'all-tasks' %}">&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;</a></li>
                     <li class="{% if page == "tasks" %} {{ active }} {% else %} {{ hover }} {% endif %} {{ default }}"><a href="{% url 'tasks' %}">&nbsp;Pending&nbsp;</a></li>
@@ -105,13 +105,13 @@
                     {% for page in paginator.page_range %}
                         &nbsp;&nbsp;
                         <a href="?page={{page}}{% if request.GET.search %}&search={{request.GET.search}}{% endif %}{% if request.GET.search_active_bar %}&search_active_bar={{request.GET.search_active_bar}}{% endif %}"
-                            class="border border-blue-500 bg-blue-50 text-xs text-center font-medium hover:bg-blue-500 text-blue-500 hover:text-white px-2 py-1 rounded-full">
+                            class="border border-blue-500 bg-blue-50 text-blue-500 text-xs text-center font-medium hover:bg-blue-500 hover:text-white px-2 py-1 rounded-full">
                             {{page}}
                         </a>
                         {% endfor %}
                     </div>
                     {% endif %}
-                    <div class="flex justify-center"><button type="button" class="mt-2 bg-blue-500 hover:bg-blue-600 cursor-pointer text-white font-medium py-2 px-10 rounded-full w-[20rem] shadow-lg shadow-blue-500/50" onclick="document.location.href='/create-task/?next={% url request.resolver_match.url_name %}'">Add</button></div>
+                    <div class="flex justify-center"><a href="{% url 'create-task' %}?next={% url request.resolver_match.url_name %}"><button type="button" class="mt-2 bg-blue-500 hover:bg-blue-600 cursor-pointer text-white font-medium py-2 px-10 rounded-full w-[20rem] shadow-lg shadow-blue-500/50">Add</button></a></div>
                 </div>
             </div>
         </div>

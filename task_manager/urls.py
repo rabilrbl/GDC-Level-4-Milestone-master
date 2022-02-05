@@ -20,7 +20,7 @@ urlpatterns = [
     path("edit-task/<int:pk>/", EditTaskView.as_view(), name="edit-task"),
     path("detail-view/<int:pk>/", TaskDetailView.as_view(), name="detail-view"),
     path("delete-task/<int:pk>/", DeleteTaskView.as_view(), name="delete-task"),
-    path("complete_task/<int:pk>/",
+    path("complete-task/<int:pk>/",
          CompleteTaskView.as_view(), name="complete-task"),
     path("tasks/", GenericListView.as_view(), name="tasks"),
     path("user/signup/", SignUpView.as_view(), name="signup"),
@@ -32,7 +32,7 @@ urlpatterns = [
          permanent=True), name="signup_redirect"),
     path("logout/", RedirectView.as_view(url="/user/logout/",
          permanent=True), name="logout_redirect"),
-    path("completed_tasks/", GenericCompletedListView.as_view(),
+    path("completed-tasks/", GenericCompletedListView.as_view(),
          name="completed-tasks"),
-    path("all_tasks/", GenericAllTaskView.as_view(), name="all-tasks"),
+    path("all-tasks/", GenericAllTaskView.as_view(), name="all-tasks"),
 ]
