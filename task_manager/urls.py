@@ -10,10 +10,19 @@ from tasks.views import (index,
 from django.contrib.auth.views import LogoutView
 from django.views.generic.base import RedirectView
 
+from tasks.apiViews import TaskViewSet
+
+from rest_framework.routers import SimpleRouter
+
+router = SimpleRouter()
+
+# Api views
+router.register("api/tasks", TaskViewSet)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # Add all your views here
+
+    # Browser based view
     path("", index, name="index"),
     path("add-task/", CreateTaskView.as_view(), name="add-task"),
     path("create-task/", CreateTaskView.as_view(), name="create-task"),
@@ -35,4 +44,4 @@ urlpatterns = [
     path("completed-tasks/", GenericCompletedListView.as_view(),
          name="completed-tasks"),
     path("all-tasks/", GenericAllTaskView.as_view(), name="all-tasks"),
-]
+] + router.urls
