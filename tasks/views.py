@@ -95,7 +95,7 @@ class TaskCreateForm(ModelForm):
         if len(title) < 5:
             raise ValidationError(
                 "Task title must be at least 5 characters long.")
-        return title.capitalize()
+        return title
 
 
 class updatePriority(AuthorizedUserMixin):
