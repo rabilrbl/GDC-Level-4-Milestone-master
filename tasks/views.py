@@ -97,26 +97,14 @@ class TaskCreateForm(ModelForm):
                 "Task title must be at least 5 characters long.")
         return title
 
-
-class updatePriority(AuthorizedUserMixin):
-
-    def __init__(self, priority, completed, request) -> None:
-        self.request = request
-        exist_priority = super().get_queryset().filter(
-            priority=priority, completed=completed).exists()
-        # if priority exists in the database
-        if exist_priority:
-            # increment the existing priority until it is unique
-            new_priority = int(priority) + 1
-            exist_priority = super().get_queryset().filter(
-                priority=new_priority, completed=completed).exists()
-            while exist_priority:
-                new_priority += 1
-                exist_priority = super().get_queryset().filter(
-                    priority=new_priority, completed=completed).exists()
-            # save
-            super().get_queryset().filter(priority=priority,
-                                          completed=completed).update(priority=new_priority)
+def updatePriority(priority, completed, user):
+    queryset = Task.objects.filter(user=user, deleted=False)
+    if queryset.filter(priority=priority, completed=completed).exists():
+        new_priority= priority + 1
+        queryset.filter(priority=priority, completed=completed).update(priority=new_priority)
+        updatePriority(new_priority, completed, user)
+    else:
+        return
 
 
 class CreateTaskView(AuthorizedUserMixin, CreateView):
@@ -126,7 +114,7 @@ class CreateTaskView(AuthorizedUserMixin, CreateView):
     def form_valid(self, form):
         # update priority if exists
         updatePriority(form.instance.priority,
-                       form.instance.completed, self.request)
+                       form.instance.completed, self.request.user)
         # set the user
         form.instance.user = self.request.user
         return super().form_valid(form)
@@ -140,7 +128,7 @@ class EditTaskView(AuthorizedUserMixin, UpdateView):
     def form_valid(self, form):
         # update if exists
         updatePriority(form.instance.priority,
-                       form.instance.completed, self.request)
+                       form.instance.completed, self.request.user)
         return super().form_valid(form)
 
 # Detailed view of a task
