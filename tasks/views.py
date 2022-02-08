@@ -1,5 +1,4 @@
 
-from os import PRIO_PROCESS
 from django.shortcuts import redirect, render
 from django.views import View
 from django.http import HttpResponseRedirect
@@ -15,8 +14,6 @@ from django.contrib.auth.views import LoginView
 from tasks.models import Task
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-from django.db import transaction
 
 class AuthorizedUserMixin(LoginRequiredMixin):
     def get_queryset(self):
