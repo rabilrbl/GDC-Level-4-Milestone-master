@@ -15,7 +15,6 @@ from tasks.models import Task
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-
 class AuthorizedUserMixin(LoginRequiredMixin):
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user, deleted=False)
@@ -97,15 +96,23 @@ class TaskCreateForm(ModelForm):
                 "Task title must be at least 5 characters long.")
         return title
 
-def updatePriority(priority, completed, user):
-    queryset = Task.objects.filter(user=user, deleted=False)
-    if queryset.filter(priority=priority, completed=completed).exists():
-        new_priority= priority + 1
-        queryset.filter(priority=priority, completed=completed).update(priority=new_priority)
-        updatePriority(new_priority, completed, user)
-    else:
-        return
 
+def updatePriority(priority, completed, user):
+    # if priority exists in the database
+    pr = priority
+    taskList = [] # store tasks to update
+    try:
+        taskCheck = Task.objects.get(priority=pr, completed=completed, user=user, deleted=False)
+        while taskCheck: # keep finding until DoesNotExist
+            pr += 1 # increase priority
+            taskCheck.priority = pr # increment priority
+            taskList.append(taskCheck) # append task to update
+            taskCheck = Task.objects.get(priority=pr, completed=completed, user=user, deleted=False) # update to next task
+    except Task.DoesNotExist: # on error
+        pass #skip
+    
+    if taskList:
+        Task.objects.bulk_update(taskList, ['priority']) # save at once
 
 class CreateTaskView(AuthorizedUserMixin, CreateView):
     form_class = TaskCreateForm
