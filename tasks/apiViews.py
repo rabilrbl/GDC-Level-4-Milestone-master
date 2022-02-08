@@ -41,7 +41,7 @@ class TaskViewSet(ModelViewSet):
         completed = self.request.data.get("completed")
         # completed returns None hence we define bool value
         if completed is None: completed = False
-        updatePriority(priority, completed, self.request)
+        updatePriority(priority, completed, self.request.user)
 
     def perform_create(self, serializer):
         self.takeCareOfPriority()
