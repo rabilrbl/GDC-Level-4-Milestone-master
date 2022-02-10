@@ -10,7 +10,7 @@ from tasks.views import (index,
 from django.contrib.auth.views import LogoutView
 from django.views.generic.base import RedirectView
 
-from tasks.apiViews import TaskViewSet
+from tasks.apiViews import TaskViewSet, HistoryViewSet
 
 from rest_framework.routers import SimpleRouter
 
@@ -18,7 +18,7 @@ router = SimpleRouter()
 
 # Api views
 router.register("api/tasks", TaskViewSet)
-
+router.register("api/history", HistoryViewSet) # this should be model view
 urlpatterns = [
     path("admin/", admin.site.urls),
 
@@ -26,10 +26,10 @@ urlpatterns = [
     path("", index, name="index"),
     path("add-task/", CreateTaskView.as_view(), name="add-task"),
     path("create-task/", CreateTaskView.as_view(), name="create-task"),
-    path("edit-task/<int:pk>/", EditTaskView.as_view(), name="edit-task"),
-    path("detail-view/<int:pk>/", TaskDetailView.as_view(), name="detail-view"),
-    path("delete-task/<int:pk>/", DeleteTaskView.as_view(), name="delete-task"),
-    path("complete-task/<int:pk>/",
+    path("edit-task/<slug>/", EditTaskView.as_view(), name="edit-task"),
+    path("detail-view/<slug>/", TaskDetailView.as_view(), name="detail-view"),
+    path("delete-task/<slug>/", DeleteTaskView.as_view(), name="delete-task"),
+    path("complete-task/<slug>/",
          CompleteTaskView.as_view(), name="complete-task"),
     path("tasks/", GenericListView.as_view(), name="tasks"),
     path("user/signup/", SignUpView.as_view(), name="signup"),
