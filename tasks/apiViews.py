@@ -11,7 +11,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from rest_framework.permissions import IsAuthenticated
 
-from django_filters.rest_framework import DjangoFilterBackend, FilterSet, CharFilter, ChoiceFilter, DateTimeFilter
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet, CharFilter, ChoiceFilter, DateTimeFilter, DateFromToRangeFilter, DateTimeFromToRangeFilter
 
 
 
@@ -56,13 +56,22 @@ class TaskViewSet(ModelViewSet):
         return instance.soft_delete()
 
 class HistoryFilter(FilterSet):
-    change_date = DateTimeFilter(label="Modified Date")
+    # Filter date and time
+    change_date = DateTimeFilter(label="Modified Date Time")
+    new_status = ChoiceFilter(choices=STATUS_CHOICES)
+    old_status = ChoiceFilter(choices=STATUS_CHOICES)
+    filter_date= DateTimeFromToRangeFilter(label="Date Time Range", field_name="change_date")
+
+class HistTaskSer(ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ["title", "priority", "description", "date_created"]
 
 class HistorySerializer(ModelSerializer):
-    task = TaskSerializer(read_only=True)
+
     class Meta:
         model = History
-        fields = ["old_status", "new_status", "change_date","task"]
+        fields = ["change_date", "old_status", "new_status"]
 
 class HistoryViewSet(ReadOnlyModelViewSet):
 
@@ -75,4 +84,4 @@ class HistoryViewSet(ReadOnlyModelViewSet):
     queryset = History.objects.all()
 
     def get_queryset(self):
-        return History.objects.filter(user=self.request.user)
+        return History.objects.filter(task=self.kwargs["history_pk"]).order_by("-change_date")

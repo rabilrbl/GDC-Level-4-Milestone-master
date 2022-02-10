@@ -12,13 +12,17 @@ from django.views.generic.base import RedirectView
 
 from tasks.apiViews import TaskViewSet, HistoryViewSet
 
-from rest_framework.routers import SimpleRouter
+from rest_framework_nested import routers
+# import DefaultRouter
+from rest_framework.routers import DefaultRouter
 
-router = SimpleRouter()
+router = DefaultRouter()
+router.register(r'api/tasks', TaskViewSet, basename='tasks')
+client_router = routers.NestedSimpleRouter(router, r'api/tasks', lookup='history')
+client_router.register(r'history', HistoryViewSet, basename="history")
+
 
 # Api views
-router.register("api/tasks", TaskViewSet)
-router.register("api/history", HistoryViewSet) # this should be model view
 urlpatterns = [
     path("admin/", admin.site.urls),
 
@@ -44,4 +48,4 @@ urlpatterns = [
     path("completed-tasks/", GenericCompletedListView.as_view(),
          name="completed-tasks"),
     path("all-tasks/", GenericAllTaskView.as_view(), name="all-tasks"),
-] + router.urls
+] + router.urls + client_router.urls

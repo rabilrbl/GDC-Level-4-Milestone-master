@@ -1,3 +1,4 @@
+from urllib import request
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -18,7 +19,6 @@ class History(models.Model):
     old_status = models.CharField(max_length=100, choices=STATUS_CHOICES, default="n/a")
     new_status = models.CharField(max_length=100, choices=STATUS_CHOICES, default="n/a")
     change_date = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.task.title
@@ -70,16 +70,7 @@ class Task(models.Model):
 @receiver(signals.pre_save, sender=Task)
 def task_pre_save(sender, instance, **kwargs):
     if instance.pk:
-        history  = History.objects.get(task=instance)
         old_status = sender.objects.get(pk=instance.pk).status
         if old_status != instance.status:
-            history.old_status = old_status
+            history  = History.objects.create(task=instance, new_status=instance.status, old_status=old_status)
             history.save()
-
-# post_save to store new_status
-@receiver(signals.post_save, sender=Task)
-def task_post_save(sender, instance, **kwargs):
-    history = History.objects.get_or_create(task=instance, user=instance.user)[0]
-    if history.new_status != instance.status:
-        history.new_status = instance.status
-        history.save()
