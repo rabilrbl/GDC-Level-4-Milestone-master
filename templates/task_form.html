@@ -33,7 +33,7 @@
                 <span class="text-red-600 font-medium">{{ form.errors.description }}</span>
             </div>
             <div class="flex flex-row m-1 items-center space-x-2">
-                {{ form.completed }} <label for="{{ form.completed.id }}" class="text-gray-700 font-bold">Completed</label>
+                <label for="{{ form.status.id }}" class="text-gray-700 font-bold">Status</label> {{ form.status }}
             </div>
             <button type="submit" class="bg-blue-500 hover:bg-blue-700 cursor-pointer text-white font-bold py-2 px-4 rounded-lg shadow-lg shadow-blue-500/50">{% block task_button %}{% endblock %}</button>
         </div>

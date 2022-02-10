@@ -1,4 +1,5 @@
 
+from gc import get_objects
 from django.shortcuts import redirect, render
 from django.views import View
 from django.http import HttpResponseRedirect
@@ -16,6 +17,8 @@ from tasks.models import Task
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 class AuthorizedUserMixin(LoginRequiredMixin):
+    slug_field = 'external_id'
+
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user, deleted=False)
 
@@ -82,12 +85,12 @@ class TaskCreateForm(ModelForm):
             {'class': 'bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
         self.fields['description'].widget.attrs.update(
             {'class': 'caret-blue-500 bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
-        self.fields['completed'].widget.attrs.update(
-            {'class': 'bg-gray-50 focus:bg-white px-4 py-2 shadow-lg shadow-blue-200 hover:ring-blue-300 h-5 w-5 bg-blue-500 text-white accent-blue-500 focus:outline-none focus:shadow-outline'})
+        self.fields['status'].widget.attrs.update(
+            {'class': 'bg-gray-50 py-1 text-center rounded-lg shadow-lg border border-gray-200 focus:ring focus:ring-blue-400 shadow-blue-200 hover:ring-blue-300 text-blue-500 focus:outline-none focus:shadow-outline'})
 
     class Meta:
         model = Task
-        fields = ['title', 'priority', 'description', 'completed']
+        fields = ['title', 'priority', 'description', 'status']
 
     def clean_title(self):
         title = self.cleaned_data['title']
@@ -96,32 +99,11 @@ class TaskCreateForm(ModelForm):
                 "Task title must be at least 5 characters long.")
         return title
 
-
-def updatePriority(priority, completed, user):
-    # if priority exists in the database
-    pr = priority
-    taskList = [] # store tasks to update
-    try:
-        taskCheck = Task.objects.get(priority=pr, completed=completed, user=user, deleted=False)
-        while taskCheck: # keep finding until DoesNotExist
-            pr += 1 # increase priority
-            taskCheck.priority = pr # increment priority
-            taskList.append(taskCheck) # append task to update
-            taskCheck = Task.objects.get(priority=pr, completed=completed, user=user, deleted=False) # update to next task
-    except Task.DoesNotExist: # on error
-        pass #skip
-    
-    if taskList:
-        Task.objects.bulk_update(taskList, ['priority']) # save at once
-
 class CreateTaskView(AuthorizedUserMixin, CreateView):
     form_class = TaskCreateForm
     template_name = 'create_task.html'
 
     def form_valid(self, form):
-        # update priority if exists
-        updatePriority(form.instance.priority,
-                       form.instance.completed, self.request.user)
         # set the user
         form.instance.user = self.request.user
         return super().form_valid(form)
@@ -131,12 +113,6 @@ class EditTaskView(AuthorizedUserMixin, UpdateView):
     model = Task
     form_class = TaskCreateForm
     template_name = 'edit_task.html'
-
-    def form_valid(self, form):
-        # update if exists
-        updatePriority(form.instance.priority,
-                       form.instance.completed, self.request.user)
-        return super().form_valid(form)
 
 # Detailed view of a task
 
@@ -163,8 +139,8 @@ class DeleteTaskView(AuthorizedUserMixin, DeleteView):
 
 class CompleteTaskView(AuthorizedUserMixin, View):
     def get(self, request, *args, **kwargs):
-        task = self.get_queryset().get(pk=self.kwargs['pk'])
-        task.completed = True
+        task = self.get_queryset().get(external_id=self.kwargs['slug'])
+        task.status = "completed"
         task.save()
         _from = request.GET.get('next')
         return redirect(_from) if _from else redirect('/tasks/')
@@ -179,7 +155,7 @@ class GenericListView(AuthorizedUserMixin, ListView):
 
     def get_queryset(self):
         search_query = self.request.GET.get('search')
-        tasks = super().get_queryset().filter(completed=False).order_by('priority')
+        tasks = super().get_queryset().filter(status='pending', completed=False).order_by('priority')
         if search_query:
             tasks = tasks.filter(title__icontains=search_query)
         return tasks
