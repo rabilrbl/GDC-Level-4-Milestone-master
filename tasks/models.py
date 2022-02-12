@@ -67,7 +67,6 @@ class Task(models.Model):
         super(Task, self).save(*args, **kwargs)
 
 class Report(models.Model):
-    external_id = models.UUIDField(default=uuid4, unique=True, db_index=True, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE,)
     consent = models.BooleanField(default=False, help_text="Uncheck to stop receiving reports")
     time = models.TimeField(default=time(0,0,0), null=True, blank=True, help_text="All times are in UTC 24hr format.")
