@@ -4,7 +4,8 @@ from django.urls import path
 from tasks.views import (index,
                          GenericListView, CreateTaskView,
                          EditTaskView, GenericAllTaskView, GenericCompletedListView,
-                         TaskDetailView, DeleteTaskView, SignUpView, LoginView, CompleteTaskView
+                         TaskDetailView, DeleteTaskView, SignUpView, LoginView, CompleteTaskView,
+                         CreateTimeView
                          )
 
 from django.contrib.auth.views import LogoutView
@@ -48,4 +49,5 @@ urlpatterns = [
     path("completed-tasks/", GenericCompletedListView.as_view(),
          name="completed-tasks"),
     path("all-tasks/", GenericAllTaskView.as_view(), name="all-tasks"),
+    path("report/create", CreateTimeView.as_view(), name="report-create"),
 ] + router.urls + client_router.urls

@@ -6,6 +6,7 @@ from django.db.models import signals
 from django.dispatch import receiver
 
 from uuid import uuid4
+from datetime import time
 
 STATUS_CHOICES = (
     ("pending", "Pending"),
@@ -64,6 +65,15 @@ class Task(models.Model):
         self.completed = self.status == "completed"
 
         super(Task, self).save(*args, **kwargs)
+
+class Report(models.Model):
+    external_id = models.UUIDField(default=uuid4, unique=True, db_index=True, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,)
+    consent = models.BooleanField(default=False, help_text="Uncheck to stop receiving reports")
+    time = models.TimeField(default=time(0,0,0), null=True, blank=True, help_text="All times are in UTC 24hr format.")
+
+    def __str__(self) -> str:
+        return self.user.username
 
 
 # pre_save to store old_status

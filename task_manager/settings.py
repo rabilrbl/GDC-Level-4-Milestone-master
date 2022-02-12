@@ -116,8 +116,6 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
-TIME_ZONE = 'Asia/Kolkata'
 
 
 # Static files (CSS, JavaScript, Images)
@@ -135,6 +133,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/tasks/'
 LOGIN_URL = '/user/login/'
 LOGOUT_REDIRECT_URL = '/'
+
+BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # Activate Django-Heroku.
