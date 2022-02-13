@@ -20,6 +20,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.contrib.auth.models import User
 
+from tasks.tasks  import send_email_report
+
 class AuthorizedUserMixin(LoginRequiredMixin):
     slug_field = 'external_id'
 
@@ -101,7 +103,7 @@ class SignUpView(CreateView):
     def form_valid(self, form):
         # if reports checkbox is checked redirect to reports page
         if form.cleaned_data['reports']:
-            self.success_url = '/user/login?next=/report/create'
+            self.success_url = '/user/login?next=/reports'
         return super(SignUpView, self).form_valid(form)
 
 
@@ -226,16 +228,17 @@ class ReportTimeForm(ModelForm):
     class Meta:
         model = Report
         fields = ['time', 'consent']
-
-    def __init__(self, *args, **kwargs):
-        super(ReportTimeForm, self).__init__(*args, **kwargs)
-        self.fields['time'].widget.attrs.update(
-            {'class': 'bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
-        self.fields['consent'].widget.attrs.update({'class': SignUpView.checkboxCssClass })
+    
 
 class CreateTimeView(AuthorizedUserMixin, UpdateView):
     form_class = ReportTimeForm
     template_name = 'reports.html'
+
+    def get_form(self):
+        form = super(CreateTimeView, self).get_form()
+        form.fields['time'].widget.attrs.update({'class': 'bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full' })
+        form.fields['consent'].widget.attrs.update({'class': SignUpView.checkboxCssClass })
+        return form
 
     def get_object(self):
         return Report.objects.get_or_create(user=self.request.user)[0]
