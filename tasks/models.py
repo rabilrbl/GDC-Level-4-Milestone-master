@@ -51,6 +51,8 @@ class Task(models.Model):
         taskList = [] # store tasks to update
         try:
             taskCheck = Task.objects.get(priority=pr, status=status, user=user, deleted=False)
+            if taskCheck.pk == self.pk and taskCheck.priority == self.priority:
+                raise Task.DoesNotExist
             while taskCheck: # keep finding until DoesNotExist
                 pr += 1 # increase priority
                 taskCheck.priority = pr # increment priority
