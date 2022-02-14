@@ -120,8 +120,7 @@ class CreateTaskView(AuthorizedUserMixin, CreateView):
 
     def form_valid(self, form):
         # update priority if exists
-        updatePriority(form.instance.priority,
-                       form.instance.completed, self.request.user)
+        updatePriority(form.instance.priority, form.instance.completed, self.request.user)
         # set the user
         form.instance.user = self.request.user
         return super().form_valid(form)
@@ -132,10 +131,11 @@ class EditTaskView(AuthorizedUserMixin, UpdateView):
     form_class = TaskCreateForm
     template_name = 'edit_task.html'
 
+
     def form_valid(self, form):
-        # update if exists
-        updatePriority(form.instance.priority,
-                       form.instance.completed, self.request.user)
+        if 'priority' in form.changed_data: # if priority was changed
+            # update if exists
+            updatePriority(form.instance.priority, form.instance.completed, self.request.user)
         return super().form_valid(form)
 
 # Detailed view of a task
