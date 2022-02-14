@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_filters',
-    "tasks"
+    'tailwind',
+    'django_browser_reload',
+    "tasks",
 ]
 
 MIDDLEWARE = [
@@ -51,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
 ROOT_URLCONF = 'task_manager.urls'
@@ -116,6 +119,11 @@ USE_I18N = True
 
 USE_L10N = True
 
+TAILWIND_APP_NAME = 'tasks'
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 
 # Static files (CSS, JavaScript, Images)

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 
 from tasks.views import (index,
                          GenericListView, CreateTaskView,
@@ -29,6 +29,7 @@ urlpatterns = [
 
     # Browser based view
     path("", index, name="index"),
+    path("__reload__/", include("django_browser_reload.urls")),
     path("add-task/", CreateTaskView.as_view(), name="add-task"),
     path("create-task/", CreateTaskView.as_view(), name="create-task"),
     path("edit-task/<slug>/", EditTaskView.as_view(), name="edit-task"),
