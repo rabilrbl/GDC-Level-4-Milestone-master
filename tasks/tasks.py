@@ -4,13 +4,11 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from tasks.models import Task, Report
 
-
-
 from task_manager.celery import app
 
 @app.task
 def send_email_report(report) -> None:
-    user = User.objects.get(id=report['user'])
+    user = report.user
     task = Task.objects.filter(user=user, deleted=False)
     print(f"Sending email reminder to {user.username}\n")
     pending_tasks = task.filter(status="pending").count()
@@ -25,9 +23,9 @@ def send_email_report(report) -> None:
 def periodic_emailer():
     currentTime = datetime.now()
     print("Checking time for user daily report......")
-    reports = Report.objects.filter(time__range=(time(currentTime.hour,currentTime.minute,0), time(currentTime.hour,currentTime.minute,59)), consent=True).values('user')
+    reports = Report.objects.filter(time__range=(time(currentTime.hour,currentTime.minute,0), time(currentTime.hour,currentTime.minute,59)), consent=True)
     for rpt in reports:
-        send_email_report.delay(rpt)
+        send_email_report(rpt)
 
 app.conf.beat_schedule["send-daily-user-report"] = {
         'task':'tasks.tasks.periodic_emailer',
