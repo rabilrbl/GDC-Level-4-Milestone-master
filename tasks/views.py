@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
+from django.http.response import Http404
 
 from django.views.generic.detail import DetailView
 
@@ -171,9 +172,12 @@ class DeleteTaskView(AuthorizedUserMixin, DeleteView):
 
 class CompleteTaskView(AuthorizedUserMixin, View):
     def get(self, request, *args, **kwargs):
-        task = self.get_queryset().get(external_id=self.kwargs['slug'])
-        task.status = "completed"
-        task.save()
+        try:
+            task = self.get_queryset().get(external_id=self.kwargs['slug'])
+            task.status = "completed"
+            task.save()
+        except Task.DoesNotExist:
+            raise Http404
         _from = request.GET.get('next')
         return redirect(_from) if _from else redirect('/tasks/')
 
@@ -236,7 +240,6 @@ class CreateTimeView(AuthorizedUserMixin, UpdateView):
 
     def get_form(self):
         form = super(CreateTimeView, self).get_form()
-        form.fields['time'].widget.attrs.update({'class': 'bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full' })
         form.fields['consent'].widget.attrs.update({'class': SignUpView.checkboxCssClass })
         return form
 
