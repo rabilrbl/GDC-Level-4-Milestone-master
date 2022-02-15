@@ -71,7 +71,7 @@ class Task(models.Model):
 class Report(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,)
     consent = models.BooleanField(default=False, help_text="Uncheck to stop receiving reports")
-    time = models.TimeField(default=time(0,0,0), null=True, blank=True, help_text="All times are in UTC 24hr format.")
+    time = models.TimeField(default=time(0,0,0), help_text="All times are in UTC format.")
 
     def __str__(self) -> str:
         return self.user.username
