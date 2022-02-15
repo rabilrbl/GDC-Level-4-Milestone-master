@@ -50,5 +50,5 @@ urlpatterns = [
     path("completed-tasks/", GenericCompletedListView.as_view(),
          name="completed-tasks"),
     path("all-tasks/", GenericAllTaskView.as_view(), name="all-tasks"),
-    path("reports/", CreateTimeView.as_view(), name="report-create"),
+    path("reports/", CreateTimeView.as_view(), name="reports"),
 ] + router.urls + client_router.urls
