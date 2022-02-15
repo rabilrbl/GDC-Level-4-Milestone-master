@@ -1,13 +1,11 @@
 
-from re import template
-from urllib import request
 from django.shortcuts import redirect, render
 from django.views import View
 from django.http import HttpResponseRedirect
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
-from django.http.response import Http404
+from django.shortcuts import get_object_or_404
 
 from django.views.generic.detail import DetailView
 
@@ -172,12 +170,9 @@ class DeleteTaskView(AuthorizedUserMixin, DeleteView):
 
 class CompleteTaskView(AuthorizedUserMixin, View):
     def get(self, request, *args, **kwargs):
-        try:
-            task = self.get_queryset().get(external_id=self.kwargs['slug'])
-            task.status = "completed"
-            task.save()
-        except Task.DoesNotExist:
-            raise Http404
+        task = get_object_or_404(self.get_queryset(), external_id=self.kwargs['slug'])
+        task.status = "completed"
+        task.save()
         _from = request.GET.get('next')
         return redirect(_from) if _from else redirect('/tasks/')
 
