@@ -1,6 +1,7 @@
 <!-- View all tasks page -->
 {% extends "task_base.html" %}
 {% block taskent %}
+            <div>
                 {% if tasks %}
                 {% for task in tasks %}
                 <div class="flex flex-row bg-blue-50 px-8 py-5 border-2 border-blue-100 rounded-full shadow-lg shadow-blue-500/50 my-5  items-center">
@@ -46,5 +47,4 @@
                 </p>
                 {% endif %}
             </div>
-        </div>
 {% endblock %}
