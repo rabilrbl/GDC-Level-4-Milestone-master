@@ -1,14 +1,14 @@
 from urllib import response
 from django.contrib.auth.models import User, AnonymousUser
 
-from .models import Task, History, Report
+from tasks.models import Task, History, Report
 
-from django.test import TestCase, RequestFactory
+from django.test import TestCase, RequestFactory, Client
 
 from django.http.response import Http404
 
 # Web View
-from .views import (
+from tasks.views import (
     GenericListView, CreateTaskView, 
     EditTaskView, TaskDetailView, 
     DeleteTaskView, CompleteTaskView,
@@ -18,11 +18,11 @@ from .views import (
 )
 
 # Api Views
-from .views import (
+from tasks.views import (
     GenericListView,
 )
 
-class WebAuthenticationTests(TestCase):
+class WebAuthTests(TestCase):
 
     def test_not_authenticated(self):
         """
@@ -117,6 +117,9 @@ class WebAuthorizedTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_create_task_view(self):
+        """
+        Test Create Task View
+        """
         response = CreateTaskView.as_view()(self.request)
         self.assertEqual(response.status_code, 200)
         response_content = response.render().content.decode()
@@ -126,6 +129,9 @@ class WebAuthorizedTests(TestCase):
         self.assertInHTML("Status", response_content)
     
     def test_edit_task_view(self):
+        """
+        Test Edit Task View
+        """
         response = EditTaskView.as_view()(self.request, pk=self.task1.pk)
         self.assertEqual(response.status_code, 200)
         response_content = response.render().content.decode()
@@ -133,6 +139,9 @@ class WebAuthorizedTests(TestCase):
         self.assertInHTML(self.task1.description, response_content)
 
     def test_detail_view(self):
+        """
+        Test Detail Task View
+        """
         response = TaskDetailView.as_view()(self.request, pk=self.task1.pk)
         self.assertEqual(response.status_code, 200)
         response_content = response.render().content.decode()
@@ -140,10 +149,16 @@ class WebAuthorizedTests(TestCase):
         self.assertInHTML(self.task1.description, response_content)
 
     def test_complete_view(self):
+        """
+        Test Mark Complete View
+        """
         response = CompleteTaskView.as_view()(self.request, slug=self.task1.external_id)
         self.assertEqual(response.status_code, 302)
 
     def test_delete_view(self):
+        """
+        Test Delete Task Component
+        """
         response = DeleteTaskView.as_view()(self.request, pk=self.task1.pk)
         self.assertEqual(response.status_code, 200)
         response_content = response.render().content.decode()
@@ -152,6 +167,9 @@ class WebAuthorizedTests(TestCase):
         self.assertInHTML("Cancel", response_content)
     
     def test_soft_delete(self):
+        """
+        Test Soft Delete in views
+        """
         # Test soft delete
         self.task1.deleted=True
         self.task1.save()
@@ -161,6 +179,9 @@ class WebAuthorizedTests(TestCase):
         self.assertRaises(Http404, DeleteTaskView.as_view(), self.request, pk=self.task1.pk)
 
     def test_error_generic_view_components(self):
+        """
+        Random Tests
+        """
         # unauthorized access
         self.assertRaises(Http404,  EditTaskView.as_view(), self.request, pk=self.task2.pk)
         self.assertRaises(Http404,  TaskDetailView.as_view(), self.request, pk=self.task2.pk)
