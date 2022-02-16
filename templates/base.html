@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tasks</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{% block title %}Tasks Manager{% endblock %}</title>
+    {% load tailwind_tags %}
+    {% tailwind_css %}
     <!-- SEO -->
-    <meta name="description" content="">
-    <meta name="keywords" content="">
-    <meta name="author" content="">
+    <meta name="description" content="{% block desc %}{% endblock %}">
+    <meta name="keywords" content="{% block keywords %}{% endblock %}">
     <!-- Favicon -->
     <link rel="shortcut icon" href="">
     <header class=" p-4">

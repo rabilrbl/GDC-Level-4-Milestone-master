@@ -5,17 +5,24 @@ from django.http import HttpResponseRedirect
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
+from django.shortcuts import get_object_or_404
+
 from django.views.generic.detail import DetailView
 
 from django.forms import ModelForm, ValidationError
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView
-
-from tasks.models import Task
+from django import forms
+from tasks.models import Task, Report
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from django.contrib.auth.models import User
+
+
 class AuthorizedUserMixin(LoginRequiredMixin):
+    slug_field = 'external_id'
+
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user, deleted=False)
 
@@ -43,18 +50,62 @@ class LoginView(LoginView):
         form = super().get_form(form_class)
         # Add the form field to the form
         form.fields['username'].widget.attrs.update(
-            {'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-full shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline ring-blue-500 focus:bg-white focus:ring-2'})
+            {
+                'class': '''
+                    w-full px-4 py-2 bg-gray-50 border
+                    border-gray-300 rounded-full shadow-lg
+                    shadow-blue-100 focus:shadow-blue-200
+                    focus:outline-none focus:shadow-outline
+                    ring-blue-500 focus:bg-white focus:ring-2
+                '''
+            }
+        )
         form.fields['password'].widget.attrs.update(
-            {'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-full shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline ring-blue-500 focus:bg-white focus:ring-2'})
+            {
+                'class': '''
+                    w-full px-4 py-2 bg-gray-50
+                    border border-gray-300 rounded-full
+                    shadow-lg shadow-blue-100 focus:shadow-blue-200
+                    focus:outline-none focus:shadow-outline
+                    ring-blue-500 focus:bg-white focus:ring-2
+                '''
+            }
+        )
         return form
 
 
+class UserSignUpForm(UserCreationForm):
+    terms = forms.BooleanField(required=True)
+    reports = forms.BooleanField(required=False)
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email',
+                  'password1', 'password2', 'terms', 'reports')
+
+
 class SignUpView(CreateView):
-    form_class = UserCreationForm
+    form_class = UserSignUpForm
     success_url = '/user/login'
     template_name = 'signup.html'
 
+    formCssClass = """
+        w-full px-4 py-2 bg-gray-50
+        border border-gray-300 rounded-lg
+        shadow-lg shadow-blue-100 focus:shadow-blue-200
+        focus:outline-none focus:shadow-outline
+        ring-blue-500 focus:bg-white
+        focus:ring-2
+    """
+    checkboxCssClass = '''
+        bg-gray-50 cursor-pointer focus:bg-white
+        px-4 py-2 shadow-lg shadow-blue-200
+        hover:ring-blue-300 h-5 w-5 bg-blue-500
+        text-white accent-blue-500 focus:outline-none
+        focus:shadow-outline
+    '''
     # allow only for unauthenticated users
+
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return redirect('/tasks/')
@@ -64,12 +115,49 @@ class SignUpView(CreateView):
     def get_form(self, form_class=None):
         form = super(SignUpView, self).get_form()
         form.fields['username'].widget.attrs.update(
-            {'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline ring-blue-500 focus:bg-white focus:ring-2'})
+            {'class': self.formCssClass})
         form.fields['password1'].widget.attrs.update(
-            {'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline  ring-blue-500 focus:bg-white focus:ring-2'})
+            {'class': self.formCssClass})
         form.fields['password2'].widget.attrs.update(
-            {'class': 'w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-lg shadow-blue-100 focus:shadow-blue-200 focus:outline-none focus:shadow-outline  ring-blue-500 focus:bg-white focus:ring-2'})
+            {'class': self.formCssClass})
+        form.fields['email'].widget.attrs.update(
+            {
+                'class': self.formCssClass,
+                'placeholder': 'Mail Address',
+                'required': True,
+            }
+        )
+        form.fields['first_name'].widget.attrs.update(
+            {
+                'class': self.formCssClass,
+                'placeholder': 'First Name',
+            }
+        )
+        form.fields['last_name'].widget.attrs.update(
+            {
+                'class': self.formCssClass,
+                'placeholder': 'Last Name'
+            }
+        )
+        form.fields['terms'].widget.attrs.update(
+            {
+                'class': self.checkboxCssClass,
+                'placeholder': 'I agree to the terms and conditions',
+            }
+        )
+        form.fields['reports'].widget.attrs.update(
+            {
+                'class': self.checkboxCssClass,
+                'placeholder': 'I want to receive reports',
+            }
+        )
         return form
+
+    def form_valid(self, form):
+        # if reports checkbox is checked redirect to reports page
+        if form.cleaned_data['reports']:
+            self.success_url = '/user/login?next=/reports'
+        return super(SignUpView, self).form_valid(form)
 
 
 class TaskCreateForm(ModelForm):
@@ -77,17 +165,47 @@ class TaskCreateForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(TaskCreateForm, self).__init__(*args, **kwargs)
         self.fields['title'].widget.attrs.update(
-            {'class': 'bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
+            {
+                'class': '''
+                    bg-gray-50 focus:bg-white border
+                    border-gray-200 rounded-lg px-4 py-2 focus:ring
+                    shadow-lg focus:ring-blue-400 shadow-blue-200
+                    focus:outline-none focus:shadow-outline w-full
+                '''
+            }
+        )
         self.fields['priority'].widget.attrs.update(
-            {'class': 'bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
+            {
+                'class': '''
+                    bg-gray-50 focus:bg-white border
+                    border-gray-200 rounded-lg px-4 py-2
+                    focus:ring shadow-lg focus:ring-blue-400
+                    shadow-blue-200 focus:outline-none
+                    focus:shadow-outline w-full'''
+            }
+        )
         self.fields['description'].widget.attrs.update(
-            {'class': 'caret-blue-500 bg-gray-50 focus:bg-white border border-gray-200 rounded-lg px-4 py-2 focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200 focus:outline-none focus:shadow-outline w-full'})
-        self.fields['completed'].widget.attrs.update(
-            {'class': 'bg-gray-50 focus:bg-white px-4 py-2 shadow-lg shadow-blue-200 hover:ring-blue-300 h-5 w-5 bg-blue-500 text-white accent-blue-500 focus:outline-none focus:shadow-outline'})
+            {
+                'class': '''
+                    caret-blue-500 bg-gray-50 focus:bg-white
+                    border border-gray-200 rounded-lg px-4 py-2
+                    focus:ring shadow-lg focus:ring-blue-400 shadow-blue-200
+                    focus:outline-none focus:shadow-outline w-full'''
+            }
+        )
+        self.fields['status'].widget.attrs.update(
+            {
+                'class': '''
+                    bg-gray-50 py-1 text-center rounded-lg
+                    shadow-lg border border-gray-200 focus:ring
+                    focus:ring-blue-400 shadow-blue-200 hover:ring-blue-300
+                    text-blue-500 focus:outline-none focus:shadow-outline'''
+            }
+        )
 
     class Meta:
         model = Task
-        fields = ['title', 'priority', 'description', 'completed']
+        fields = ['title', 'priority', 'description', 'status']
 
     def clean_title(self):
         title = self.cleaned_data['title']
@@ -97,30 +215,11 @@ class TaskCreateForm(ModelForm):
         return title
 
 
-def updatePriority(priority, completed, user):
-    # if priority exists in the database
-    pr = priority
-    taskList = [] # store tasks to update
-    try:
-        taskCheck = Task.objects.get(priority=pr, completed=completed, user=user, deleted=False)
-        while taskCheck: # keep finding until DoesNotExist
-            pr += 1 # increase priority
-            taskCheck.priority = pr # increment priority
-            taskList.append(taskCheck) # append task to update
-            taskCheck = Task.objects.get(priority=pr, completed=completed, user=user, deleted=False) # update to next task
-    except Task.DoesNotExist: # on error
-        pass #skip
-    
-    if taskList:
-        Task.objects.bulk_update(taskList, ['priority']) # save at once
-
 class CreateTaskView(AuthorizedUserMixin, CreateView):
     form_class = TaskCreateForm
     template_name = 'create_task.html'
 
     def form_valid(self, form):
-        # update priority if exists
-        updatePriority(form.instance.priority, form.instance.completed, self.request.user)
         # set the user
         form.instance.user = self.request.user
         return super().form_valid(form)
@@ -130,13 +229,6 @@ class EditTaskView(AuthorizedUserMixin, UpdateView):
     model = Task
     form_class = TaskCreateForm
     template_name = 'edit_task.html'
-
-
-    def form_valid(self, form):
-        if 'priority' in form.changed_data: # if priority was changed
-            # update if exists
-            updatePriority(form.instance.priority, form.instance.completed, self.request.user)
-        return super().form_valid(form)
 
 # Detailed view of a task
 
@@ -163,8 +255,9 @@ class DeleteTaskView(AuthorizedUserMixin, DeleteView):
 
 class CompleteTaskView(AuthorizedUserMixin, View):
     def get(self, request, *args, **kwargs):
-        task = self.get_queryset().get(pk=self.kwargs['pk'])
-        task.completed = True
+        task = get_object_or_404(
+            self.get_queryset(), external_id=self.kwargs['slug'])
+        task.status = "completed"
         task.save()
         _from = request.GET.get('next')
         return redirect(_from) if _from else redirect('/tasks/')
@@ -179,7 +272,8 @@ class GenericListView(AuthorizedUserMixin, ListView):
 
     def get_queryset(self):
         search_query = self.request.GET.get('search')
-        tasks = super().get_queryset().filter(completed=False).order_by('priority')
+        tasks = super().get_queryset().filter(
+            status='pending', completed=False).order_by('priority')
         if search_query:
             tasks = tasks.filter(title__icontains=search_query)
         return tasks
@@ -194,7 +288,9 @@ class GenericCompletedListView(AuthorizedUserMixin, ListView):
 
     def get_queryset(self):
         search_query = self.request.GET.get('search')
-        tasks = super().get_queryset().filter(completed=True).order_by('priority')
+        tasks = super().get_queryset().filter(
+            completed=True,
+            ).order_by('priority')
         if search_query:
             tasks = tasks.filter(title__icontains=search_query)
         return tasks
@@ -213,3 +309,24 @@ class GenericAllTaskView(AuthorizedUserMixin, ListView):
         if search_query:
             tasks = tasks.filter(title__icontains=search_query)
         return tasks
+
+
+# Create a form view to receive time from the user for daily report
+class ReportTimeForm(ModelForm):
+    class Meta:
+        model = Report
+        fields = ['time', 'consent']
+
+
+class CreateTimeView(AuthorizedUserMixin, UpdateView):
+    form_class = ReportTimeForm
+    template_name = 'reports.html'
+
+    def get_form(self):
+        form = super(CreateTimeView, self).get_form()
+        form.fields['consent'].widget.attrs.update(
+            {'class': SignUpView.checkboxCssClass})
+        return form
+
+    def get_object(self):
+        return Report.objects.get_or_create(user=self.request.user)[0]
