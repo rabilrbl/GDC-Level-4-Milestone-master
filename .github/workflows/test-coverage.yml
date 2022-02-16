@@ -23,4 +23,6 @@ jobs:
       - name: coverage report
         run: |
           coverage report
-  
+      - name: flake8 linting
+        run: |
+          flake8

@@ -8,3 +8,4 @@ celery==4.4.7
 redis
 django-tailwind
 coverage
+flake8
