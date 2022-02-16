@@ -1,0 +1,17 @@
+[flake8]
+exclude =
+    .git,
+    .gitignore,
+    *.pot,
+    *.py[co],
+    __pycache__,
+    venv,
+    .env,
+    tasks/static,
+    tasks/static_src,
+    tasks/migrations,
+    tasks/templates,
+    .vscode,
+    .github
+    tasks/tests
+    task_manager/settings.py

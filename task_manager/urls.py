@@ -1,12 +1,14 @@
 from django.contrib import admin
 from django.urls import path, include
 
-from tasks.views import (index,
-                         GenericListView, CreateTaskView,
-                         EditTaskView, GenericAllTaskView, GenericCompletedListView,
-                         TaskDetailView, DeleteTaskView, SignUpView, LoginView, CompleteTaskView,
-                         CreateTimeView
-                         )
+from tasks.views import (
+     index, GenericListView, CreateTaskView,
+     EditTaskView, GenericAllTaskView,
+     GenericCompletedListView,
+     TaskDetailView, DeleteTaskView, SignUpView,
+     LoginView, CompleteTaskView,
+     CreateTimeView,
+)
 
 from django.contrib.auth.views import LogoutView
 from django.views.generic.base import RedirectView
@@ -19,7 +21,9 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'api/tasks', TaskViewSet, basename='tasks')
-client_router = routers.NestedSimpleRouter(router, r'api/tasks', lookup='history')
+client_router = routers.NestedSimpleRouter(
+     router, r'api/tasks', lookup='history',
+)
 client_router.register(r'history', HistoryViewSet, basename="history")
 
 
