@@ -149,6 +149,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # Activate Django-Heroku.
-if not DEBUG:
+if os.environ.get('HEROKU'):
     import django_heroku
     django_heroku.settings(locals())
