@@ -7,8 +7,20 @@ This is a full-stack web application created with Django and Tailwindcss.
 This App was created as part of the Django 202 course offered on Pupilfirst school by being part of the Global Digital Corps fellowship in 2022.
 
 ---
-##### To start server
+##### Initialize project 
 ```
-$ ./run.sh
+$ python3 -m pip install -r requirements
+$ python3 manage.py tailwind install
+```
+##### To start server for development
+```
+$ ./rundev.sh
+```
+##### Run automated tests
+```
+$ python3 manage.py test
 ```
 ---
+*Shoutout to my Django coach [Vignesh Hari](https://github.com/vigneshhari) for his awesome guidance and code reviews*
+
+**&copy; rabilrbl**
