@@ -154,3 +154,5 @@ if os.environ.get('HEROKU'):
     import django_heroku
     django_heroku.settings(locals())
     DEBUG = False
+    BROKER_URL = os.environ.get('REDIS_URL')
+    CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL')
