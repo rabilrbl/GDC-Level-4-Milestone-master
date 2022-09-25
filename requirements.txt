@@ -1,3 +1,4 @@
+psycopg2-binary
 Django==4.0.1
 django-heroku
 gunicorn
